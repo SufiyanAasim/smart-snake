@@ -1,0 +1,13 @@
+# Compiler and IDE outputs
+build/
+dist/
+out/
+nbproject/private/
+.idea/workspace.xml
+.idea/shelf/
+.idea/history/
+*.class
+
+# Persistence files
+q_table.txt
+scores.db
