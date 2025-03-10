@@ -1,5 +1,5 @@
 # Release Notes - v1.0.0-beta
-# Release Name: "Retro Serpent: Genesis"
+# Release Name: "RetroSerpent: Genesis"
 
 **Release Date**: July 16, 2026  
 **Target Platform**: Java 21 (OpenJDK)  

@@ -1,0 +1,21 @@
+# Git Attributes Configuration
+# Standardize line endings and binary handling
+
+# Handle line endings automatically
+* text=auto
+
+# Source code files
+*.java text diff=java
+*.xml text
+*.properties text
+*.md text
+*.bat text
+*.ps1 text
+*.yml text
+*.yaml text
+
+# Binary assets
+*.jar binary
+*.png binary
+*.jpg binary
+*.db binary

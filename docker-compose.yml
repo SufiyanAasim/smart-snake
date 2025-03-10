@@ -1,0 +1,11 @@
+# Docker Compose configuration for Smart Snake Game
+services:
+  game:
+    build: .
+    image: smart-snake-game:latest
+    container_name: smart-snake-game
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    network_mode: host
