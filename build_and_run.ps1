@@ -19,7 +19,7 @@ if (-not (Test-Path "out/production/Project")) {
     New-Item -ItemType Directory -Force -Path "out/production/Project" | Out-Null
 }
 
-& $JAVAC -d out/production/Project src/project/*.java
+& $JAVAC -cp "lib/sqlite-jdbc.jar;lib/slf4j-api.jar;lib/slf4j-simple.jar" -d out/production/Project src/project/*.java
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Compilation failed!"
     exit $LASTEXITCODE
@@ -39,4 +39,4 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "JAR packaged successfully at dist/SmartSnakeGame.jar" -ForegroundColor Green
 
 Write-Host "=== Running Smart Snake Game ===" -ForegroundColor Cyan
-& $JAVA -jar dist/SmartSnakeGame.jar
+& $JAVA -cp "dist/SmartSnakeGame.jar;lib/sqlite-jdbc.jar;lib/slf4j-api.jar;lib/slf4j-simple.jar" project.Project
