@@ -65,6 +65,8 @@ public class Project extends JFrame {
 
         // 4. Hook HUD updates
         controller.setHUDCallback(new GameController.HUDUpdateCallback() {
+            private final DatabaseManager dbManager = new DatabaseManager();
+
             @Override
             public void updateHUD(int score, int highScore, int steps, int pathLength, String efficiency, String stateVector) {
                 lblScoreVal.setText(String.valueOf(score));
@@ -77,7 +79,22 @@ public class Project extends JFrame {
 
             @Override
             public void onGameOver() {
-                // Future v4 hook for name prompt scoreboard record
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        String name = JOptionPane.showInputDialog(Project.this, 
+                            "Game Over! Enter your name for the Scoreboard:", 
+                            "Score Record", 
+                            JOptionPane.PLAIN_MESSAGE);
+                        if (name == null) name = "Guest";
+                        if (name.trim().isEmpty()) name = "Guest";
+                        
+                        dbManager.recordScore(name, model.getScore(), model.getHighScore(), model.getAIMode(), model.getMovesCount());
+                        
+                        LeaderboardDialog dialog = new LeaderboardDialog(Project.this, dbManager);
+                        dialog.setVisible(true);
+                    }
+                });
             }
         });
     }
@@ -232,15 +249,17 @@ public class Project extends JFrame {
         panel.add(Box.createVerticalStrut(15));
 
         // --- SECTION 4: ACTIONS BUTTONS ---
-        JPanel btnPanel = new JPanel(new GridLayout(1, 2, 10, 0));
+        JPanel btnPanel = new JPanel(new GridLayout(1, 3, 5, 0));
         btnPanel.setBackground(new Color(25, 27, 34));
-        btnPanel.setMaximumSize(new Dimension(270, 40));
+        btnPanel.setMaximumSize(new Dimension(290, 40));
 
-        JButton btnPause = new JButton("Pause / Resume");
-        JButton btnReset = new JButton("Reset Game");
+        JButton btnPause = new JButton("Pause");
+        JButton btnReset = new JButton("Reset");
+        JButton btnBoard = new JButton("Scores");
         
         styleButton(btnPause, new Color(76, 141, 255)); // cyan blue
         styleButton(btnReset, new Color(255, 59, 48)); // red
+        styleButton(btnBoard, new Color(0, 229, 255)); // neon blue
 
         btnPause.addActionListener(new ActionListener() {
             @Override
@@ -258,8 +277,18 @@ public class Project extends JFrame {
             }
         });
 
+        btnBoard.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                LeaderboardDialog dialog = new LeaderboardDialog(Project.this, new DatabaseManager());
+                dialog.setVisible(true);
+                requestFocusInWindow();
+            }
+        });
+
         btnPanel.add(btnPause);
         btnPanel.add(btnReset);
+        btnPanel.add(btnBoard);
         panel.add(btnPanel);
         
         panel.add(Box.createVerticalGlue());
