@@ -1,3 +1,12 @@
+/**
+ * ==============================================================================
+ * Project: Smart Snake Game
+ * Module: Snakegame (Legacy Container Engine & Autoplay hooks)
+ * Authors:
+ *   - Mohammad Sufiyan Aasim (sufiyanaasim@outlook.com / GitHub: SufiyanAasim)
+ *   - Fahad Bin Nasir (fahadabbasi17025@gmail.com / GitHub: FahadBinNasir)
+ * ==============================================================================
+ */
 package project;
 
 import javax.swing.JPanel;

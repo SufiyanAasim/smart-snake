@@ -1,3 +1,12 @@
+/**
+ * ==============================================================================
+ * Project: Smart Snake Game
+ * Module: Project (Main Window & Sidebar HUD Dashboard)
+ * Authors:
+ *   - Mohammad Sufiyan Aasim (sufiyanaasim@outlook.com / GitHub: SufiyanAasim)
+ *   - Fahad Bin Nasir (fahadabbasi17025@gmail.com / GitHub: FahadBinNasir)
+ * ==============================================================================
+ */
 package project;
 
 import javax.swing.*;
@@ -249,17 +258,19 @@ public class Project extends JFrame {
         panel.add(Box.createVerticalStrut(15));
 
         // --- SECTION 4: ACTIONS BUTTONS ---
-        JPanel btnPanel = new JPanel(new GridLayout(1, 3, 5, 0));
+        JPanel btnPanel = new JPanel(new GridLayout(2, 2, 5, 5));
         btnPanel.setBackground(new Color(25, 27, 34));
-        btnPanel.setMaximumSize(new Dimension(290, 40));
+        btnPanel.setMaximumSize(new Dimension(290, 75));
 
         JButton btnPause = new JButton("Pause");
         JButton btnReset = new JButton("Reset");
         JButton btnBoard = new JButton("Scores");
+        JButton btnCredits = new JButton("Credits");
         
         styleButton(btnPause, new Color(76, 141, 255)); // cyan blue
         styleButton(btnReset, new Color(255, 59, 48)); // red
         styleButton(btnBoard, new Color(0, 229, 255)); // neon blue
+        styleButton(btnCredits, new Color(57, 255, 20)); // neon green
 
         btnPause.addActionListener(new ActionListener() {
             @Override
@@ -286,9 +297,19 @@ public class Project extends JFrame {
             }
         });
 
+        btnCredits.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CreditsDialog dialog = new CreditsDialog(Project.this);
+                dialog.setVisible(true);
+                requestFocusInWindow();
+            }
+        });
+
         btnPanel.add(btnPause);
         btnPanel.add(btnReset);
         btnPanel.add(btnBoard);
+        btnPanel.add(btnCredits);
         panel.add(btnPanel);
         
         panel.add(Box.createVerticalGlue());

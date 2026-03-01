@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## [4.0.0] - 2026-07-16
-### Codename: dbserpent
+### Codename: vaultserpent
 
 ### Added
 - relational SQLite database score tracker via local JDBC.
