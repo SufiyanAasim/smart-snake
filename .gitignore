@@ -11,3 +11,7 @@ nbproject/private/
 # Persistence files
 q_table.txt
 scores.db
+
+# C# Launcher artifacts
+src_launcher/bin/
+src_launcher/obj/

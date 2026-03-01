@@ -1,3 +1,12 @@
+/**
+ * ==============================================================================
+ * Project: Smart Snake Game
+ * Module: GameView (MVC Graphical View Component)
+ * Authors:
+ *   - Mohammad Sufiyan Aasim (sufiyanaasim@outlook.com / GitHub: SufiyanAasim)
+ *   - Fahad Bin Nasir (fahadabbasi17025@gmail.com / GitHub: FahadBinNasir)
+ * ==============================================================================
+ */
 package project;
 
 import javax.swing.JPanel;
