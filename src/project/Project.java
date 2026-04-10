@@ -42,6 +42,16 @@ public class Project extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
 
+        // Load window icon
+        try {
+            java.io.File iconFile = new java.io.File("assets/logo.png");
+            if (iconFile.exists()) {
+                setIconImage(new ImageIcon(iconFile.getAbsolutePath()).getImage());
+            }
+        } catch (Exception e) {
+            System.err.println("Could not set window icon: " + e.getMessage());
+        }
+
         // 1. Initialize MVC
         model = new GameModel(GRID_WIDTH, GRID_HEIGHT, CELL_SIZE);
         view = new GameView(model);

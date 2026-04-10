@@ -3,7 +3,7 @@
 ![Java 21](https://img.shields.io/badge/Java-21-orange.svg)
 ![License MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Build Status](https://img.shields.io/badge/Build-passing-brightgreen.svg)
-![Codename](https://img.shields.io/badge/Codename-dbserpent-purple.svg)
+![Codename](https://img.shields.io/badge/Codename-vaultserpent-purple.svg)
 
 ## Project Overview
 Smart Snake Game is a secure, feature-rich offline desktop simulation application that transforms the classic retro game into a smart computational grid. Users can play manually or watch intelligent autonomous solvers (A* Pathfinding and BFS) and trained Machine Learning agents (Q-Learning) play the game with perfect precision. It features a modern neon HUD sidebar dashboard and persistent SQLite database logging for scores, historic matches, and stats.
@@ -82,10 +82,17 @@ graph TD
 ---
 
 ## Quick Start
-To compile and run the application instantly on Windows, open a PowerShell terminal and run:
+On Windows, you can launch the game instantly by double-clicking the native executable **`SmartSnakeGame.exe`** directly in the root directory!
+
+Alternatively, to compile, package, and execute the game from source:
 ```powershell
 ./build_and_run.ps1
 ```
+
+### Prerequisites
+To run the game, you only need to ensure the following:
+1. **Java Development Kit (JDK) 21 or JRE 21** must be installed on your machine so the system can run Java classes.
+2. **Nothing else is required to download!** All database links, drivers (`sqlite-jdbc.jar`), loggers (`slf4j`), and pretrained reinforcement learning configurations (`q_table.txt`) are already pre-packaged in the repository.
 
 ---
 
@@ -140,7 +147,7 @@ As an offline desktop client, cloud deployments are not natively supported. Remo
 ---
 
 ## API Documentation
-There are no external REST APIs. See code structure guides in [docs/Developer Guide.md](file:///d:/Completed%20Github%20Projects%20%28Fully%20Tested%20&%20Deployed%29/docs/Developer%20Guide.md) for internal Java class signatures.
+There are no external REST APIs. See code structure guides in [docs/guides/Developer Guide.md](file:///d:/Completed%20Github%20Projects%20%28Fully%20Tested%20&%20Deployed%29/Smart%20Snake%20Game/docs/guides/Developer%20Guide.md) for internal Java class signatures.
 
 ---
 
@@ -201,7 +208,7 @@ A: Check that JDK 21 bin folder is on your system path.
 ---
 
 ## Troubleshooting
-Refer to the detailed guide in [docs/Troubleshooting.md](file:///d:/Completed%20Github%20Projects%20%28Fully%20Tested%20&%20Deployed%29/Smart%20Snake%20Game/docs/Troubleshooting.md).
+Refer to the detailed guide in [docs/troubleshooting/Troubleshooting.md](file:///d:/Completed%20Github%20Projects%20%28Fully%20Tested%20&%20Deployed%29/Smart%20Snake%20Game/docs/troubleshooting/Troubleshooting.md).
 
 ---
 
