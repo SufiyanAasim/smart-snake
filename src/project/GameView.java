@@ -20,11 +20,22 @@ import java.awt.font.TextLayout;
 
 public class GameView extends JPanel {
     private final GameModel model;
+    private java.awt.Image logoImage;
 
     public GameView(GameModel model) {
         this.model = model;
         setPreferredSize(new Dimension(model.getWidth(), model.getHeight()));
         setBackground(new Color(10, 12, 16)); // Sleek, modern dark background
+
+        // Load visual logo
+        try {
+            java.io.File logoFile = new java.io.File("assets/logo.png");
+            if (logoFile.exists()) {
+                logoImage = javax.imageio.ImageIO.read(logoFile);
+            }
+        } catch (java.io.IOException e) {
+            System.err.println("Could not load logo image: " + e.getMessage());
+        }
     }
 
     @Override
@@ -105,10 +116,19 @@ public class GameView extends JPanel {
         g2d.setColor(new Color(15, 20, 30, 220));
         g2d.fillRect(0, 0, model.getWidth(), model.getHeight());
 
+        // Draw Centered Logo
+        if (logoImage != null) {
+            int logoWidth = 140;
+            int logoHeight = 140;
+            int logoX = (model.getWidth() - logoWidth) / 2;
+            int logoY = model.getHeight() / 6;
+            g2d.drawImage(logoImage, logoX, logoY, logoWidth, logoHeight, null);
+        }
+
         g2d.setColor(Color.WHITE);
         g2d.setFont(g2d.getFont().deriveFont(22F));
         
-        int currentHeight = model.getHeight() / 3;
+        int currentHeight = (logoImage != null) ? (model.getHeight() / 6 + 160) : (model.getHeight() / 3);
         var frc = g2d.getFontRenderContext();
         for (String line : message.split("\n")) {
             var layout = new TextLayout(line, g2d.getFont(), frc);
