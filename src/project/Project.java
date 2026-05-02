@@ -156,6 +156,7 @@ public class Project extends JFrame {
         styleRadioButton(rbManual);
         styleRadioButton(rbAStar);
         styleRadioButton(rbQLearn);
+        rbManual.setForeground(new Color(57, 255, 20)); // Neon green active selection
 
         ActionListener modeListener = new ActionListener() {
             @Override
@@ -349,6 +350,40 @@ public class Project extends JFrame {
         rb.setForeground(new Color(200, 205, 215));
         rb.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         rb.setFocusable(false);
+        rb.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        rb.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                rb.setForeground(new Color(0, 229, 255)); // Glow cyan on hover
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (rb.isSelected()) {
+                    rb.setForeground(new Color(57, 255, 20)); // Keep green if selected
+                } else {
+                    rb.setForeground(new Color(200, 205, 215)); // Restore default
+                }
+            }
+        });
+
+        rb.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Container parent = rb.getParent();
+                if (parent != null) {
+                    for (Component c : parent.getComponents()) {
+                        if (c instanceof JRadioButton r) {
+                            if (r.isSelected()) {
+                                r.setForeground(new Color(57, 255, 20)); // Green for selected
+                            } else {
+                                r.setForeground(new Color(200, 205, 215)); // Gray for non-selected
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 
     private void styleButton(JButton btn, Color accent) {
@@ -358,6 +393,19 @@ public class Project extends JFrame {
         btn.setBorder(BorderFactory.createLineBorder(accent, 1));
         btn.setFocusable(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btn.setBackground(accent);
+                btn.setForeground(new Color(15, 17, 22)); // High-contrast text
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btn.setBackground(new Color(35, 39, 48));
+                btn.setForeground(Color.WHITE);
+            }
+        });
     }
 
     private JLabel createConfigLabel(String text) {
