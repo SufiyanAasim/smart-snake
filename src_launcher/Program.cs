@@ -32,6 +32,7 @@ namespace SmartSnakeGameLauncher
                 startInfo.Arguments = $"-cp \"{classpath}\" project.Project";
                 startInfo.UseShellExecute = false;
                 startInfo.CreateNoWindow = true; // Prevents command window creation
+                startInfo.WorkingDirectory = baseDir; // Set active execution folder context
 
                 Process.Start(startInfo);
             }
