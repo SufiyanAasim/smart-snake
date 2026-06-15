@@ -13,7 +13,7 @@ Codenames use a theme centered around **"Serpent"** without spaces:
 - **v1.0.0**: `retroserpent`
 - **v2.0.0**: `cyberserpent`
 - **v3.0.0**: `synthserpent`
-- **v4.0.0**: `dbserpent`
+- **v4.0.0**: `vaultserpent`
 
 ## Release Branches
 - Code is developed in `develop` and merged into `release/vX.Y.Z` for staging.
