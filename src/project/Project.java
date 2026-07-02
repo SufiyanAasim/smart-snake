@@ -40,7 +40,7 @@ public class Project extends JFrame {
     public Project() {
         super("Smart Snake Game");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setResizable(false);
+        setResizable(true); // Enable window resizing
 
         // Load window icon
         try {
@@ -72,13 +72,8 @@ public class Project extends JFrame {
         pack();
         setLocationRelativeTo(null);
 
-        // 3. Setup Keyboard Controls
-        addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                controller.handleKeyPress(e.getKeyCode());
-            }
-        });
+        // 3. Setup Keyboard Controls via Key Bindings (Global capture inside focused window)
+        setupKeyBindings();
         setFocusable(true);
         requestFocusInWindow();
 
@@ -101,12 +96,9 @@ public class Project extends JFrame {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        String name = JOptionPane.showInputDialog(Project.this, 
-                            "Game Over! Enter your name for the Scoreboard:", 
-                            "Score Record", 
-                            JOptionPane.PLAIN_MESSAGE);
-                        if (name == null) name = "Guest";
-                        if (name.trim().isEmpty()) name = "Guest";
+                        NameInputDialog nameDialog = new NameInputDialog(Project.this, model.getScore());
+                        nameDialog.setVisible(true);
+                        String name = nameDialog.getPlayerName();
                         
                         dbManager.recordScore(name, model.getScore(), model.getHighScore(), model.getAIMode(), model.getMovesCount());
                         
@@ -161,9 +153,15 @@ public class Project extends JFrame {
         ActionListener modeListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (rbManual.isSelected()) model.setAIMode("Manual");
-                else if (rbAStar.isSelected()) model.setAIMode("A*");
-                else if (rbQLearn.isSelected()) model.setAIMode("Q-Learning");
+                if (rbManual.isSelected()) {
+                    model.setAIMode("Manual");
+                    model.getCurrentPath().clear();
+                } else if (rbAStar.isSelected()) {
+                    model.setAIMode("A*");
+                } else if (rbQLearn.isSelected()) {
+                    model.setAIMode("Q-Learning");
+                    model.getCurrentPath().clear();
+                }
                 controller.updateHUD();
                 view.repaint();
                 requestFocusInWindow();
@@ -187,7 +185,7 @@ public class Project extends JFrame {
         JPanel sectionOptions = createSectionContainer("SPEED & SETTINGS");
         
         // Speed slider
-        JLabel lblSpeed = createConfigLabel("Simulation Speed:");
+        JLabel lblSpeed = createConfigLabel("Simulation Speed: 2x");
         JSlider sliderSpeed = new JSlider(1, 5, 2); // default 2
         sliderSpeed.setBackground(new Color(25, 27, 34));
         sliderSpeed.setPaintTicks(true);
@@ -197,19 +195,21 @@ public class Project extends JFrame {
         sliderSpeed.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
+                lblSpeed.setText("Simulation Speed: " + sliderSpeed.getValue() + "x");
                 controller.setSpeed(sliderSpeed.getValue());
                 requestFocusInWindow();
             }
         });
         
         // Epsilon slider (QLearning exploration parameter)
-        JLabel lblEpsilon = createConfigLabel("Q-Agent Epsilon (Exploration):");
+        JLabel lblEpsilon = createConfigLabel("Q-Agent Epsilon (Exploration): 0.10");
         JSlider sliderEpsilon = new JSlider(0, 100, 10); // maps 0.0 to 1.0 (default 0.1)
         sliderEpsilon.setBackground(new Color(25, 27, 34));
         sliderEpsilon.setFocusable(false);
         sliderEpsilon.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
+                lblEpsilon.setText("Q-Agent Epsilon (Exploration): " + String.format("%.2f", sliderEpsilon.getValue() / 100f));
                 controller.getQLearningAgent().setEpsilon(sliderEpsilon.getValue() / 100f);
                 requestFocusInWindow();
             }
@@ -230,6 +230,30 @@ public class Project extends JFrame {
             }
         });
 
+        // Border physics selection
+        JLabel lblBorderMode = createConfigLabel("Border Physics Mode:");
+        String[] borderModes = { "Solid Borders (Death)", "Wrap Borders (Portal)" };
+        JComboBox<String> comboBorder = new JComboBox<>(borderModes);
+        comboBorder.setBackground(new Color(35, 39, 48));
+        comboBorder.setForeground(Color.WHITE);
+        comboBorder.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        comboBorder.setFocusable(false);
+        comboBorder.setMaximumSize(new Dimension(280, 25));
+        comboBorder.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String selected = (String) comboBorder.getSelectedItem();
+                if (selected != null) {
+                    if (selected.contains("Wrap")) {
+                        model.setBorderMode("Wrap");
+                    } else {
+                        model.setBorderMode("Solid");
+                    }
+                }
+                requestFocusInWindow();
+            }
+        });
+
         sectionOptions.add(lblSpeed);
         sectionOptions.add(sliderSpeed);
         sectionOptions.add(Box.createVerticalStrut(8));
@@ -237,6 +261,10 @@ public class Project extends JFrame {
         sectionOptions.add(sliderEpsilon);
         sectionOptions.add(Box.createVerticalStrut(10));
         sectionOptions.add(cbShowPath);
+        sectionOptions.add(Box.createVerticalStrut(10));
+        sectionOptions.add(lblBorderMode);
+        sectionOptions.add(Box.createVerticalStrut(3));
+        sectionOptions.add(comboBorder);
 
         panel.add(sectionOptions);
         panel.add(Box.createVerticalStrut(10));
@@ -269,18 +297,22 @@ public class Project extends JFrame {
         panel.add(Box.createVerticalStrut(15));
 
         // --- SECTION 4: ACTIONS BUTTONS ---
-        JPanel btnPanel = new JPanel(new GridLayout(2, 2, 5, 5));
+        JPanel btnPanel = new JPanel(new GridLayout(3, 2, 5, 5));
         btnPanel.setBackground(new Color(25, 27, 34));
-        btnPanel.setMaximumSize(new Dimension(290, 75));
+        btnPanel.setMaximumSize(new Dimension(290, 110));
 
         JButton btnPause = new JButton("Pause");
         JButton btnReset = new JButton("Reset");
         JButton btnBoard = new JButton("Scores");
+        JButton btnHelp = new JButton("Help");
+        JButton btnFull = new JButton("Fullscreen");
         JButton btnCredits = new JButton("Credits");
         
         styleButton(btnPause, new Color(76, 141, 255)); // cyan blue
         styleButton(btnReset, new Color(255, 59, 48)); // red
         styleButton(btnBoard, new Color(0, 229, 255)); // neon blue
+        styleButton(btnHelp, new Color(255, 170, 0)); // orange help
+        styleButton(btnFull, new Color(0, 229, 255)); // neon cyan
         styleButton(btnCredits, new Color(57, 255, 20)); // neon green
 
         btnPause.addActionListener(new ActionListener() {
@@ -308,6 +340,22 @@ public class Project extends JFrame {
             }
         });
 
+        btnHelp.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                HelpDialog dialog = new HelpDialog(Project.this);
+                dialog.setVisible(true);
+                requestFocusInWindow();
+            }
+        });
+
+        btnFull.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                toggleFullscreen();
+            }
+        });
+
         btnCredits.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -320,6 +368,8 @@ public class Project extends JFrame {
         btnPanel.add(btnPause);
         btnPanel.add(btnReset);
         btnPanel.add(btnBoard);
+        btnPanel.add(btnHelp);
+        btnPanel.add(btnFull);
         btnPanel.add(btnCredits);
         panel.add(btnPanel);
         
@@ -427,6 +477,53 @@ public class Project extends JFrame {
         label.setFont(new Font("Segoe UI", Font.BOLD, 12));
         label.setForeground(new Color(57, 255, 20)); // Neon green values
         return label;
+    }
+
+    private void setupKeyBindings() {
+        JComponent content = (JComponent) getContentPane();
+        int[] keys = {
+            KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT,
+            KeyEvent.VK_SPACE, KeyEvent.VK_F11
+        };
+
+        for (int k : keys) {
+            String keyName = "KEY_" + k;
+            content.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(k, 0), keyName);
+            content.getActionMap().put(keyName, new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (k == KeyEvent.VK_F11) {
+                        toggleFullscreen();
+                    } else {
+                        controller.handleKeyPress(k);
+                    }
+                }
+            });
+        }
+    }
+
+    // Fullscreen fields & methods
+    private boolean isFullscreen = false;
+    private Dimension savedSize;
+    private Point savedLocation;
+
+    public void toggleFullscreen() {
+        isFullscreen = !isFullscreen;
+        dispose(); // Dispose frame to change decoration settings
+        if (isFullscreen) {
+            savedSize = getSize();
+            savedLocation = getLocation();
+            setUndecorated(true);
+            setExtendedState(JFrame.MAXIMIZED_BOTH);
+        } else {
+            setUndecorated(false);
+            setExtendedState(JFrame.NORMAL);
+            setSize(savedSize != null ? savedSize : new Dimension(1100, 600));
+            if (savedLocation != null) setLocation(savedLocation);
+            else setLocationRelativeTo(null);
+        }
+        setVisible(true);
+        requestFocusInWindow();
     }
 
     public static void main(String[] args) {

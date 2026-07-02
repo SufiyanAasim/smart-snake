@@ -25,9 +25,11 @@ public class GameModel {
     
     private boolean gameStarted = false;
     private boolean gameOver = false;
+    private boolean paused = false;
     private int score = 0;
     private int highScore = 0;
     private int movesCount = 0;
+    private String borderMode = "Solid"; // "Solid" or "Wrap"
 
     // AI configurations
     private String aiMode = "Manual"; // "Manual", "A*", "Q-Learning"
@@ -51,6 +53,7 @@ public class GameModel {
         direction = Direction.RIGHT;
         newDirection = Direction.RIGHT;
         gameOver = false;
+        paused = false;
         // Keep gameStarted state so player doesn't have to re-press Space if not needed,
         // but reset if it was game over.
     }
@@ -78,7 +81,7 @@ public class GameModel {
     public boolean isGameOver() { return gameOver; }
     public void setGameOver(boolean over) { this.gameOver = over; }
 
-    public int getScore() { return snake.size(); }
+    public int getScore() { return Math.max(0, snake.size() - 1); }
     
     public int getHighScore() { return highScore; }
     public void updateHighScore() {
@@ -99,4 +102,10 @@ public class GameModel {
 
     public boolean isPathVisualized() { return pathVisualized; }
     public void setPathVisualized(boolean vis) { this.pathVisualized = vis; }
+
+    public String getBorderMode() { return borderMode; }
+    public void setBorderMode(String mode) { this.borderMode = mode; }
+
+    public boolean isPaused() { return paused; }
+    public void setPaused(boolean paused) { this.paused = paused; }
 }

@@ -44,10 +44,15 @@ public class GameController implements ActionListener {
         this.qAgent = new QLearningAgent();
         this.qAgent.loadQTable(Q_TABLE_FILE);
 
-        // Pre-train if missing
+        // Pre-train if missing in a background thread to prevent UI freezing
         java.io.File file = new java.io.File(Q_TABLE_FILE);
         if (!file.exists()) {
-            trainQLearning(5000);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    trainQLearning(5000);
+                }
+            }).start();
         }
     }
 
@@ -74,11 +79,15 @@ public class GameController implements ActionListener {
     }
 
     public void pauseGame() {
-        if (gameTimer.isRunning()) {
+        if (model.isGameOver() || !model.isGameStarted()) return;
+        boolean paused = !model.isPaused();
+        model.setPaused(paused);
+        if (paused) {
             gameTimer.stop();
         } else {
             gameTimer.start();
         }
+        view.repaint();
     }
 
     public void resetGame() {

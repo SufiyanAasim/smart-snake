@@ -114,17 +114,18 @@ public class DatabaseManager {
                 pstmt.setString(1, "%" + filterName.trim() + "%");
             }
             
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                list.add(new ScoreRecord(
-                    rs.getInt("id"),
-                    rs.getString("player_name"),
-                    rs.getInt("score"),
-                    rs.getInt("high_score"),
-                    rs.getString("controller_mode"),
-                    rs.getInt("moves_count"),
-                    rs.getString("date_played")
-                ));
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new ScoreRecord(
+                        rs.getInt("id"),
+                        rs.getString("player_name"),
+                        rs.getInt("score"),
+                        rs.getInt("high_score"),
+                        rs.getString("controller_mode"),
+                        rs.getInt("moves_count"),
+                        rs.getString("date_played")
+                    ));
+                }
             }
         } catch (SQLException e) {
             System.err.println("Error fetching scores: " + e.getMessage());
