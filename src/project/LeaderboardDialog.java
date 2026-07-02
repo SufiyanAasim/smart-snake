@@ -128,11 +128,12 @@ public class LeaderboardDialog extends JDialog {
             public void actionPerformed(ActionEvent e) {
                 int row = table.getSelectedRow();
                 if (row == -1) {
-                    JOptionPane.showMessageDialog(LeaderboardDialog.this, "Please select a score record to delete.", "Select Record", JOptionPane.WARNING_MESSAGE);
+                    new ConfirmDialog(LeaderboardDialog.this, "Select Record", "Please select a score record to delete.", new Color(255, 170, 0), false).setVisible(true);
                     return;
                 }
-                int confirm = JOptionPane.showConfirmDialog(LeaderboardDialog.this, "Delete this score record?", "Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-                if (confirm == JOptionPane.YES_OPTION) {
+                ConfirmDialog confirm = new ConfirmDialog(LeaderboardDialog.this, "Confirm Delete", "Delete this score record?", new Color(255, 59, 48), true);
+                confirm.setVisible(true);
+                if (confirm.isConfirmed()) {
                     int id = (int) tableModel.getValueAt(row, 0);
                     dbManager.deleteScore(id);
                     refreshTableData();
@@ -143,8 +144,9 @@ public class LeaderboardDialog extends JDialog {
         btnClear.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int confirm = JOptionPane.showConfirmDialog(LeaderboardDialog.this, "Clear all scores history?", "Wipe Scoreboard", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-                if (confirm == JOptionPane.YES_OPTION) {
+                ConfirmDialog confirm = new ConfirmDialog(LeaderboardDialog.this, "Wipe Scoreboard", "Clear all scores history?", new Color(255, 59, 48), true);
+                confirm.setVisible(true);
+                if (confirm.isConfirmed()) {
                     dbManager.clearAllScores();
                     refreshTableData();
                 }
@@ -156,9 +158,9 @@ public class LeaderboardDialog extends JDialog {
             public void actionPerformed(ActionEvent e) {
                 String outPath = "scores_history.csv";
                 if (dbManager.exportToCSV(outPath)) {
-                    JOptionPane.showMessageDialog(LeaderboardDialog.this, "Exported successfully to " + outPath, "Export CSV", JOptionPane.INFORMATION_MESSAGE);
+                    new ConfirmDialog(LeaderboardDialog.this, "Export CSV", "Exported successfully to " + outPath, new Color(57, 255, 20), false).setVisible(true);
                 } else {
-                    JOptionPane.showMessageDialog(LeaderboardDialog.this, "Failed to export CSV.", "Error", JOptionPane.ERROR_MESSAGE);
+                    new ConfirmDialog(LeaderboardDialog.this, "Error", "Failed to export CSV.", new Color(255, 59, 48), false).setVisible(true);
                 }
             }
         });

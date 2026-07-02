@@ -39,10 +39,15 @@ public class CreditsDialog extends JDialog {
         title.setForeground(new Color(0, 229, 255)); // Neon Cyan
         headerPanel.add(title, BorderLayout.NORTH);
 
+        JLabel version = new JLabel("Version 5.0.0");
+        version.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        version.setForeground(new Color(170, 180, 195));
+        headerPanel.add(version, BorderLayout.EAST);
+
         JPanel divider = new JPanel();
         divider.setPreferredSize(new Dimension(530, 2));
         divider.setBackground(new Color(76, 141, 255));
-        headerPanel.add(divider, BorderLayout.CENTER);
+        headerPanel.add(divider, BorderLayout.SOUTH);
 
         mainPanel.add(headerPanel, BorderLayout.NORTH);
 
@@ -53,7 +58,7 @@ public class CreditsDialog extends JDialog {
         // Developer 1 Card
         JPanel card1 = createDeveloperCard(
             "Mohammad Sufiyan Aasim",
-            "Lead MVC Architect",
+            "Lead AI & Machine Learning Engineer",
             "sufiyanaasim@outlook.com",
             "https://github.com/SufiyanAasim"
         );
@@ -61,7 +66,7 @@ public class CreditsDialog extends JDialog {
         // Developer 2 Card
         JPanel card2 = createDeveloperCard(
             "Fahad Bin Nasir",
-            "AI & SQL Specialist",
+            "Lead MVC & Systems Architect",
             "fahadabbasi17025@gmail.com",
             "https://github.com/FahadBinNasir"
         );
