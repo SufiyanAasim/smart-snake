@@ -62,25 +62,63 @@ public class QLearningAgent {
         qTable[state][action] = qTable[state][action] + alpha * (reward + gamma * maxNextQ - qTable[state][action]);
     }
 
-    // Translate game grid parameters into a state index [0 - 127]
     public int getState(GamePoint head, Direction currentDir, GamePoint food, Set<GamePoint> blocked, int width, int height, int cellSize) {
+        return getState(head, currentDir, food, blocked, width, height, cellSize, false);
+    }
+
+    // Translate game grid parameters into a state index [0 - 127]
+    public int getState(GamePoint head, Direction currentDir, GamePoint food, Set<GamePoint> blocked, int width, int height, int cellSize, boolean wrapBorders) {
         // 1. Danger States relative to current heading
-        boolean dangerStraight = isColliding(getNeighborInDir(head, currentDir, cellSize), blocked, width, height, cellSize);
-        boolean dangerLeft = isColliding(getNeighborInDir(head, getTurnDirection(currentDir, 1), cellSize), blocked, width, height, cellSize);
-        boolean dangerRight = isColliding(getNeighborInDir(head, getTurnDirection(currentDir, 2), cellSize), blocked, width, height, cellSize);
+        GamePoint straightNeighbor = getNeighborInDir(head, currentDir, cellSize);
+        GamePoint leftNeighbor = getNeighborInDir(head, getTurnDirection(currentDir, 1), cellSize);
+        GamePoint rightNeighbor = getNeighborInDir(head, getTurnDirection(currentDir, 2), cellSize);
+
+        if (wrapBorders) {
+            straightNeighbor = wrap(straightNeighbor, width, height, cellSize);
+            leftNeighbor = wrap(leftNeighbor, width, height, cellSize);
+            rightNeighbor = wrap(rightNeighbor, width, height, cellSize);
+        }
+
+        boolean dangerStraight = isColliding(straightNeighbor, blocked, width, height, cellSize, wrapBorders);
+        boolean dangerLeft = isColliding(leftNeighbor, blocked, width, height, cellSize, wrapBorders);
+        boolean dangerRight = isColliding(rightNeighbor, blocked, width, height, cellSize, wrapBorders);
 
         int dangerBits = (dangerStraight ? 4 : 0) | (dangerLeft ? 2 : 0) | (dangerRight ? 1 : 0);
 
-        // 2. Relative Food Position
-        boolean foodUp = food.y() < head.y();
-        boolean foodDown = food.y() > head.y();
-        boolean foodLeft = food.x() < head.x();
-        boolean foodRight = food.x() > head.x();
+        // 2. Relative Food Position (considering shortest toroidal wrapping distance)
+        int dx = food.x() - head.x();
+        int dy = food.y() - head.y();
+
+        if (wrapBorders) {
+            int halfWidth = width / 2;
+            int halfHeight = height / 2;
+            if (Math.abs(dx) > halfWidth) {
+                dx = -Integer.signum(dx) * (width - Math.abs(dx));
+            }
+            if (Math.abs(dy) > halfHeight) {
+                dy = -Integer.signum(dy) * (height - Math.abs(dy));
+            }
+        }
+
+        boolean foodUp = dy < 0;
+        boolean foodDown = dy > 0;
+        boolean foodLeft = dx < 0;
+        boolean foodRight = dx > 0;
 
         int foodBits = (foodUp ? 8 : 0) | (foodDown ? 4 : 0) | (foodLeft ? 2 : 0) | (foodRight ? 1 : 0);
 
         // Combine: 3 bits of danger (0-7) left-shifted by 4, plus 4 bits of food (0-15)
         return (dangerBits << 4) | foodBits;
+    }
+
+    private GamePoint wrap(GamePoint p, int width, int height, int cellSize) {
+        int x = p.x();
+        int y = p.y();
+        if (x < 0) x = width - cellSize;
+        else if (x >= width) x = 0;
+        if (y < 0) y = height - cellSize;
+        else if (y >= height) y = 0;
+        return new GamePoint(x, y);
     }
 
     private GamePoint getNeighborInDir(GamePoint head, Direction dir, int cellSize) {
@@ -104,9 +142,11 @@ public class QLearningAgent {
         };
     }
 
-    private boolean isColliding(GamePoint p, Set<GamePoint> blocked, int width, int height, int cellSize) {
-        if (p.x() < 0 || p.x() >= width || p.y() < 0 || p.y() >= height) {
-            return true;
+    private boolean isColliding(GamePoint p, Set<GamePoint> blocked, int width, int height, int cellSize, boolean wrapBorders) {
+        if (!wrapBorders) {
+            if (p.x() < 0 || p.x() >= width || p.y() < 0 || p.y() >= height) {
+                return true;
+            }
         }
         return blocked.contains(p);
     }

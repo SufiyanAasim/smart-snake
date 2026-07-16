@@ -174,9 +174,24 @@ public class GameController implements ActionListener {
     }
 
     private Direction getDirectionToTarget(GamePoint from, GamePoint to) {
-        if (to.y() < from.y()) return Direction.UP;
-        if (to.y() > from.y()) return Direction.DOWN;
-        if (to.x() < from.x()) return Direction.LEFT;
+        int dx = to.x() - from.x();
+        int dy = to.y() - from.y();
+        
+        if (model.getBorderMode().equals("Wrap")) {
+            int halfWidth = model.getWidth() / 2;
+            int halfHeight = model.getHeight() / 2;
+            
+            if (Math.abs(dx) > halfWidth) {
+                dx = -Integer.signum(dx) * (model.getWidth() - Math.abs(dx));
+            }
+            if (Math.abs(dy) > halfHeight) {
+                dy = -Integer.signum(dy) * (model.getHeight() - Math.abs(dy));
+            }
+        }
+        
+        if (dy < 0) return Direction.UP;
+        if (dy > 0) return Direction.DOWN;
+        if (dx < 0) return Direction.LEFT;
         return Direction.RIGHT;
     }
 
@@ -194,13 +209,14 @@ public class GameController implements ActionListener {
 
         // 1. Evaluate Autoplay Steering
         if (model.getAIMode().equals("A*")) {
-            List<GamePoint> path = pathfinder.findPath(head, model.getFood(), model.getSnake(), model.getObstacles());
+            boolean wrapBorders = model.getBorderMode().equals("Wrap");
+            List<GamePoint> path = pathfinder.findPath(head, model.getFood(), model.getSnake(), model.getObstacles(), wrapBorders);
             if (path != null && !path.isEmpty()) {
                 model.setCurrentPath(path);
                 model.setDirection(getDirectionToTarget(head, path.get(0)));
             } else {
                 // BFS survival routing
-                List<GamePoint> safety = pathfinder.findSafetyPath(head, model.getSnake(), model.getObstacles());
+                List<GamePoint> safety = pathfinder.findSafetyPath(head, model.getSnake(), model.getObstacles(), wrapBorders);
                 if (safety != null && !safety.isEmpty()) {
                     model.setCurrentPath(safety);
                     model.setDirection(getDirectionToTarget(head, safety.get(0)));
@@ -213,7 +229,7 @@ public class GameController implements ActionListener {
             Set<GamePoint> blocked = new HashSet<>(model.getSnake());
             blocked.addAll(model.getObstacles());
             
-            int state = qAgent.getState(head, model.getDirection(), model.getFood(), blocked, model.getWidth(), model.getHeight(), cellSize);
+            int state = qAgent.getState(head, model.getDirection(), model.getFood(), blocked, model.getWidth(), model.getHeight(), cellSize, model.getBorderMode().equals("Wrap"));
             int action = qAgent.getAction(state, false);
             
             model.setNewDirection(qAgent.getTurnDirection(model.getDirection(), action));
@@ -232,11 +248,30 @@ public class GameController implements ActionListener {
             case RIGHT -> new GamePoint(head.x() + cellSize, head.y());
         };
 
+        if (model.getBorderMode().equals("Wrap")) {
+            int newX = newHead.x();
+            int newY = newHead.y();
+            if (newX < 0) {
+                newX = model.getWidth() - cellSize;
+            } else if (newX >= model.getWidth()) {
+                newX = 0;
+            }
+            if (newY < 0) {
+                newY = model.getHeight() - cellSize;
+            } else if (newY >= model.getHeight()) {
+                newY = 0;
+            }
+            newHead = new GamePoint(newX, newY);
+        }
+
         model.getSnake().addFirst(newHead);
         model.incrementMoves();
 
         // 3. Collision Checks
-        boolean isWallCollision = newHead.x() < 0 || newHead.x() >= model.getWidth() || newHead.y() < 0 || newHead.y() >= model.getHeight();
+        boolean isWallCollision = false;
+        if (model.getBorderMode().equals("Solid")) {
+            isWallCollision = newHead.x() < 0 || newHead.x() >= model.getWidth() || newHead.y() < 0 || newHead.y() >= model.getHeight();
+        }
         boolean isObstacleCollision = model.getObstacles().contains(newHead);
         boolean isSelfCollision = model.getSnake().size() != new HashSet<>(model.getSnake()).size();
 
@@ -288,7 +323,7 @@ public class GameController implements ActionListener {
             GamePoint head = model.getSnake().getFirst();
             Set<GamePoint> blocked = new HashSet<>(model.getSnake());
             blocked.addAll(model.getObstacles());
-            int state = qAgent.getState(head, model.getDirection(), model.getFood(), blocked, model.getWidth(), model.getHeight(), model.getCellSize());
+            int state = qAgent.getState(head, model.getDirection(), model.getFood(), blocked, model.getWidth(), model.getHeight(), model.getCellSize(), model.getBorderMode().equals("Wrap"));
             
             // Format state as danger binary + food relative quadrants
             int dangerBits = (state >> 4) & 7;
@@ -332,7 +367,7 @@ public class GameController implements ActionListener {
 
             while (!tOver && steps < 500) {
                 Set<GamePoint> blocked = new HashSet<>(tSnake);
-                int state = qAgent.getState(tSnake.get(0), tDir, tFood, blocked, model.getWidth(), model.getHeight(), cellSize);
+                int state = qAgent.getState(tSnake.get(0), tDir, tFood, blocked, model.getWidth(), model.getHeight(), cellSize, false);
                 int action = qAgent.getAction(state, true);
                 
                 Direction nextDir = qAgent.getTurnDirection(tDir, action);
@@ -370,7 +405,7 @@ public class GameController implements ActionListener {
                     tSnake.remove(tSnake.size() - 1);
                 }
 
-                int nextState = qAgent.getState(tSnake.get(0), nextDir, tFood, new HashSet<>(tSnake), model.getWidth(), model.getHeight(), cellSize);
+                int nextState = qAgent.getState(tSnake.get(0), nextDir, tFood, new HashSet<>(tSnake), model.getWidth(), model.getHeight(), cellSize, false);
                 qAgent.update(state, action, nextState, reward);
                 
                 tDir = nextDir;
