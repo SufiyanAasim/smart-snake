@@ -21,7 +21,7 @@ Smart Snake Game/
 
 ## 2. Compile and Package Java Engine
 ### Requirements
-* **Java Development Kit (JDK) 21** must be installed and on your environment path.
+* **Java Development Kit (JDK) 21** must be installed on the system.
 
 ### Using the PowerShell Build Wrapper
 To automate compiling of source files and packaging of the JAR:
@@ -36,11 +36,11 @@ This script compiles Java classes using the linked libraries in `/lib`, packages
 If you prefer running commands manually:
 1. **Compile Java Files**:
    ```bash
-   javac -cp "lib/sqlite-jdbc.jar;lib/slf4j-api.jar;lib/slf4j-simple.jar" -d out/production/Project src/project/*.java
+   javac -cp "lib/sqlite-jdbc.jar;lib/slf4j-api.jar;lib/slf4j-simple.jar" -d out src/project/*.java
    ```
 2. **Package JAR file**:
    ```bash
-   jar --create --file dist/SmartSnakeGame.jar --main-class project.Project -C out/production/Project project
+   jar --create --file dist/SmartSnakeGame.jar --main-class project.Project -C out project
    ```
 
 ---
@@ -65,6 +65,11 @@ This updates the **`SmartSnakeGame.exe`** binary. You do not need to rebuild the
 ---
 
 ## 4. Coding Conventions & Standards
-* **MVC Pattern**: Never place database calls or drawing methods directly inside controller classes. Keep state updates inside the model.
-* **Conventional Commits**: Commit messages should follow semantic structures (e.g., `feat(ui): ...`, `fix(ai): ...`).
-* **License & Credits**: Ensure the credit headers attributing Mohammad Sufiyan Aasim and Fahad Bin Nasir remain intact at the top of all source files.
+* **MVC Pattern**: Keep model data (scores, boundaries, directions) distinct from UI elements (buttons, grids).
+* **Toroidal Wrapping Math**: When designing solvers or movement tick processes, check `model.getBorderMode()` state:
+  * `"Solid"`: Standard boundary collision.
+  * `"Wrap"`: Coordinate translation ($x \ge \text{width} \rightarrow x = 0$).
+* **API Backward Compatibility**: Keep overloaded methods in helper agents (e.g. `Pathfinder.findPath()`, `QLearningAgent.getState()`) without wrapping parameters to avoid breaking legacy monolith source files like `Snakegame.java` during compilation.
+* **Credits Attribution**: Ensure credits align with authorship:
+  * **Mohammad Sufiyan Aasim**: **Lead AI & Machine Learning Engineer**
+  * **Fahad Bin Nasir**: **Lead MVC & Systems Architect**

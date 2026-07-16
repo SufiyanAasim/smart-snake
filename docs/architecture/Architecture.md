@@ -32,19 +32,21 @@ Manages structural data states and business variables without any GUI components
 * Coordinates of the snake nodes (using `GamePoint` structures).
 * Food location and active list of dynamic obstacles.
 * Player scores, high scores, steps count, active AI modes, and path arrays.
+* **Border Mode State**: Toggle between `"Solid"` (death on border collision) and `"Wrap"` (portal wrap-around teleportation).
 
 ### 2. View (`GameView.java`)
 Manages graphics rendering using Java AWT/Swing:
 * Extends `JPanel` to draw grid layers.
+* **Render-to-Texture Scaling**: Draws all elements onto a fixed `800x600` `BufferedImage` first, and then paints the scaled image to fit the panel bounds. This supports dynamic resizing and fullscreen layouts without modifying grid calculations.
 * Paints the snake gradient tail, glowing target food, dynamic barriers, and translucent A* path overlays.
-* Renders the game title logo (`assets/logo.png`) centered on start and Game Over overlay screens.
+* **Neon Lasers Boundary**: Draws a glowing cyan border around the active grid boundary.
 
 ### 3. Controller (`GameController.java`)
 Coordinates the application timeline and user inputs:
 * Schedules Swing `Timer` loops mapping delay ticks (from 100ms down to 20ms).
-* Delegates keyboard actions to manual direction changes.
+* Delegates keyboard actions to manual direction changes and captures `F11` for fullscreen toggles.
+* **Toroidal Coordinate Translation**: Wraps the snake's head coordinate when exiting boundaries under Wrap mode.
 * Evaluates path updates from `Pathfinder` or Q-learning predictions on each clock tick.
-* Implements the headless reinforcement training loop.
 * Updates the live sidebar panel metrics using `HUDUpdateCallback` interfaces.
 
 ---
@@ -54,20 +56,19 @@ The game features two distinct autonomous decision-making engines:
 
 ### 1. A* Pathfinder & BFS Safety (`Pathfinder.java`)
 * **A\* Search**: Calculates the shortest coordinate route from head to food using Manhattan distance heuristics.
-* **BFS Safety Routing**: When no direct path to food exists (due to trapping loops or obstacles), a Breadth-First Search (BFS) scanner calculates fallback survival moves aiming for the snake's own tail or maximum open grid coordinates.
+* **BFS Safety Routing**: When no direct path to food exists, a Breadth-First Search (BFS) scanner calculates fallback survival moves aiming for the snake's own tail or maximum open grid coordinates.
+* **Toroidal Wrapping Calculations**: Under Wrap Mode, the Manhattan heuristic and neighbor calculations resolve paths through the screen borders, using `dx_wrapped = Math.min(dx, width - dx)`.
 
 ### 2. Q-Learning Reinforcement Learning (`QLearningAgent.java`)
-* **State Vector**: Encodes 128 discrete states using binary bits for:
-  * Directional danger (Danger Left, Danger Front, Danger Right).
-  * Food relative direction (quadrant coordinates relative to head).
-* **Q-Table Model**: Stores policy weights inside a local text ledger (`q_table.txt`). Exposes a headless compiler simulating thousands of training loops in seconds.
+* **State Vector**: Encodes 128 discrete states using binary bits for directional danger and relative food quadrants.
+* **Wrapped Observations**: Adapts danger sensor detection and relative food quadrants using wrapped coordinate math under Wrap Mode.
 
 ---
 
 ## 4. Database Persistence System (`DatabaseManager.java`)
 * **SQLite JDBC**: Binds connections locally (`data/scores.db`) using `lib/sqlite-jdbc.jar`.
-* **SLF4J Logging**: Integrates `lib/slf4j-api.jar` and `lib/slf4j-simple.jar` console frameworks.
 * **Scoreboard Dialog** (`LeaderboardDialog.java`): Renders score logs, filters rows dynamically, allows deleting records, and exports scores as CSV text files.
+* **Name Input Dialog** (`NameInputDialog.java`): Custom dark-themed modal overlay matching the neon aesthetic to prompt for the player's name on Game Over.
 
 ---
 
@@ -75,4 +76,4 @@ The game features two distinct autonomous decision-making engines:
 To make Java executable natively on Windows with customized presentation:
 * **C# Bootstrapper**: Built from `src_launcher/Program.cs` and compiled with .NET SDK.
 * **Hiding Consoles**: Launches Java via `javaw.exe` (instead of `java.exe`) which hides command prompts.
-* **Embedded Icon**: Links `assets/logo.ico` within its properties so it displays the glowing game logo in Windows Explorer.
+* **Active Folder Context**: Configures `WorkingDirectory` explicitly to the launcher's folder directory so that relative classpath targets resolve correctly.
