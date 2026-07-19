@@ -113,6 +113,22 @@ Full breakdown in [docs/architecture/Architecture.md](docs/architecture/Architec
 
 ---
 
+## 📦 App Versions
+
+| Version | Codename | Release Date | Highlights |
+|---------|----------|--------------|------------|
+| [v7.0.0](docs/releases/v7.0.0.md) | **Battleserpent** | 2026-07-22 | Rival AI, arcade MIDI synth, visual themes, power-ups, and obstacle painter |
+| [v6.0.0](docs/releases/v6.0.0.md) | **Portalserpent** | 2026-07-16 | Toroidal border wrapping with portal-aware A\* and Q-Learning |
+| [v5.0.0](docs/releases/v5.0.0.md) | **Glowserpent** | 2026-07-02 | Responsive rendering, pause overlays, global key bindings, and background Q-training |
+| [v4.0.0](docs/releases/v4.0.0.md) | **Vaultserpent** | 2026-06-01 | SQLite score persistence and interactive leaderboard with CSV export |
+| [v3.0.0](docs/releases/v3.0.0.md) | **Synthserpent** | 2025-03-10 | MVC architecture, sidebar HUD, controller modes, and live AI metrics |
+| [v2.0.0](docs/releases/v2.0.0.md) | **Cyberserpent** | 2024-06-15 | A\* autoplay, BFS fallback, Q-Learning, obstacles, and progressive difficulty |
+| [v1.0.0](docs/releases/v1.0.0.md) | **Retroserpent** | 2023-11-12 | Classic keyboard gameplay, snake growth, high scores, and Java 21 build |
+
+The current stable and supported release is **v7.0.0 Battleserpent**. See the full [Changelog](CHANGELOG.md) for detailed changes across every version.
+
+---
+
 ## 🚀 Getting Started
 
 ### Requirements
