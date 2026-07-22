@@ -1,11 +1,11 @@
-# 🔍 Smart Snake Game - Troubleshooting Guide
+# 🔍 Smart Snake - Troubleshooting Guide
 
-This guide lists common problems developers or users might encounter when compiling or launching the Smart Snake Game, along with their solutions.
+This guide lists common problems developers or users might encounter when compiling or launching the Smart Snake, along with their solutions.
 
 ---
 
-## 1. SmartSnakeGame.exe fails to launch
-* **Symptom**: Double-clicking `SmartSnakeGame.exe` does nothing or exits instantly.
+## 1. SmartSnake.exe fails to launch
+* **Symptom**: Double-clicking `SmartSnake.exe` does nothing or exits instantly.
 * **Resolution**:
   1. Ensure **Java 21 JRE/JDK** is installed on your computer. You can check this by opening a command prompt and typing:
      ```bash
@@ -21,7 +21,7 @@ This guide lists common problems developers or users might encounter when compil
 * **Resolution**:
   * SQLite JDBC requires the SLF4J logging API to run. Ensure that `lib/slf4j-api.jar` and `lib/slf4j-simple.jar` are present in your local `lib/` directory and are linked in the classpath compile parameter (`-cp`).
   * If using `build_and_run.ps1`, verify that the script has the updated classpath parameter:
-    `-cp "dist/SmartSnakeGame.jar;lib/sqlite-jdbc.jar;lib/slf4j-api.jar;lib/slf4j-simple.jar"`
+    `-cp "dist/SmartSnake.jar;lib/sqlite-jdbc.jar;lib/slf4j-api.jar;lib/slf4j-simple.jar"`
 
 ---
 

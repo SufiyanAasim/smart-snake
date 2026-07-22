@@ -1,1 +1,43 @@
-name: release.yml placeholder
+name: Release Packaging
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Compile Application
+      run: |
+        mkdir -p out
+        javac -cp "lib/sqlite-jdbc.jar:lib/slf4j-api.jar:lib/slf4j-simple.jar" \
+              -d out \
+              src/project/*.java
+
+    - name: Package JAR
+      run: |
+        mkdir -p dist
+        jar --create \
+            --file dist/SmartSnake.jar \
+            --main-class project.Project \
+            -C out project
+
+    - name: Upload Release Asset
+      uses: softprops/action-gh-release@v2
+      with:
+        files: dist/SmartSnake.jar
+        body_path: RELEASE.md

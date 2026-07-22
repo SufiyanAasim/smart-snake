@@ -1,6 +1,6 @@
 /**
  * ==============================================================================
- * Project: Smart Snake Game
+ * Project: Smart Snake
  * Module: Snakegame (Legacy Container Engine & Autoplay hooks)
  * Authors:
  *   - Mohammad Sufiyan Aasim (sufiyanaasim@outlook.com / GitHub: SufiyanAasim)

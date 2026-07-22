@@ -1,6 +1,6 @@
 /**
  * ==============================================================================
- * Project: Smart Snake Game
+ * Project: Smart Snake
  * Module: DatabaseManager (Relational SQLite Logging & Queries)
  * Authors:
  *   - Mohammad Sufiyan Aasim (sufiyanaasim@outlook.com / GitHub: SufiyanAasim)

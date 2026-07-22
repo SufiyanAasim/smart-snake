@@ -1,6 +1,6 @@
 /**
  * ==============================================================================
- * Project: Smart Snake Game
+ * Project: Smart Snake
  * Module: GameController (MVC Game Update Timer Scheduler)
  * Authors:
  *   - Mohammad Sufiyan Aasim (sufiyanaasim@outlook.com / GitHub: SufiyanAasim)
@@ -26,6 +26,7 @@ public class GameController implements ActionListener {
     private final Timer gameTimer;
     private final Pathfinder pathfinder;
     private final QLearningAgent qAgent;
+    private final SoundManager soundManager;
     private final Random random = new Random();
 
     private HUDUpdateCallback hudCallback;
@@ -42,18 +43,16 @@ public class GameController implements ActionListener {
         this.gameTimer = new Timer(50, this); // Default frame delay
         this.pathfinder = new Pathfinder(model.getWidth(), model.getHeight(), model.getCellSize());
         this.qAgent = new QLearningAgent();
+        this.soundManager = new SoundManager();
         this.qAgent.loadQTable(Q_TABLE_FILE);
 
-        // Pre-train if missing in a background thread to prevent UI freezing
-        java.io.File file = new java.io.File(Q_TABLE_FILE);
-        if (!file.exists()) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    trainQLearning(5000);
-                }
-            }).start();
-        }
+        // Force pre-train at startup on a background thread to update the Q-Table with correct values
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                trainQLearning(15000);
+            }
+        }).start();
     }
 
     public void setHUDCallback(HUDUpdateCallback callback) {
@@ -90,6 +89,14 @@ public class GameController implements ActionListener {
         view.repaint();
     }
 
+    public SoundManager getSoundManager() {
+        return soundManager;
+    }
+
+    public Timer getGameTimer() {
+        return gameTimer;
+    }
+
     public void resetGame() {
         gameTimer.stop();
         model.reset();
@@ -111,6 +118,17 @@ public class GameController implements ActionListener {
             if (keyCode == KeyEvent.VK_SPACE) {
                 startGame();
             }
+            return;
+        }
+
+        // Toggles pause/resume on Space or P
+        if (keyCode == KeyEvent.VK_P || keyCode == KeyEvent.VK_SPACE) {
+            pauseGame();
+            return;
+        }
+
+        // If game is paused, ignore other keys (arrow keys)
+        if (model.isPaused()) {
             return;
         }
 
@@ -136,6 +154,9 @@ public class GameController implements ActionListener {
     private void generateFood() {
         Set<GamePoint> blocked = new HashSet<>(model.getSnake());
         blocked.addAll(model.getObstacles());
+        if (model.isRivalActive()) {
+            blocked.addAll(model.getEnemySnake());
+        }
         int cellSize = model.getCellSize();
         
         GamePoint foodPoint;
@@ -147,6 +168,16 @@ public class GameController implements ActionListener {
         } while (blocked.contains(foodPoint));
         
         model.setFood(foodPoint);
+        
+        // Select food type: 10% Golden, 5% Shield, 85% Normal
+        double roll = random.nextDouble();
+        if (roll < 0.10) {
+            model.setFoodType("Golden");
+        } else if (roll < 0.15) {
+            model.setFoodType("Shield");
+        } else {
+            model.setFoodType("Normal");
+        }
     }
 
     private void spawnObstacle() {
@@ -206,10 +237,10 @@ public class GameController implements ActionListener {
     private void move() {
         GamePoint head = model.getSnake().getFirst();
         int cellSize = model.getCellSize();
+        boolean wrapBorders = model.getBorderMode().equals("Wrap");
 
         // 1. Evaluate Autoplay Steering
         if (model.getAIMode().equals("A*")) {
-            boolean wrapBorders = model.getBorderMode().equals("Wrap");
             List<GamePoint> path = pathfinder.findPath(head, model.getFood(), model.getSnake(), model.getObstacles(), wrapBorders);
             if (path != null && !path.isEmpty()) {
                 model.setCurrentPath(path);
@@ -228,8 +259,11 @@ public class GameController implements ActionListener {
         } else if (model.getAIMode().equals("Q-Learning")) {
             Set<GamePoint> blocked = new HashSet<>(model.getSnake());
             blocked.addAll(model.getObstacles());
+            if (model.isRivalActive()) {
+                blocked.addAll(model.getEnemySnake());
+            }
             
-            int state = qAgent.getState(head, model.getDirection(), model.getFood(), blocked, model.getWidth(), model.getHeight(), cellSize, model.getBorderMode().equals("Wrap"));
+            int state = qAgent.getState(head, model.getDirection(), model.getFood(), blocked, model.getWidth(), model.getHeight(), cellSize, wrapBorders);
             int action = qAgent.getAction(state, false);
             
             model.setNewDirection(qAgent.getTurnDirection(model.getDirection(), action));
@@ -240,7 +274,7 @@ public class GameController implements ActionListener {
             model.getCurrentPath().clear();
         }
 
-        // 2. Perform step translation
+        // 2. Move Player Snake
         GamePoint newHead = switch (model.getDirection()) {
             case UP -> new GamePoint(head.x(), head.y() - cellSize);
             case DOWN -> new GamePoint(head.x(), head.y() + cellSize);
@@ -248,42 +282,112 @@ public class GameController implements ActionListener {
             case RIGHT -> new GamePoint(head.x() + cellSize, head.y());
         };
 
-        if (model.getBorderMode().equals("Wrap")) {
+        if (wrapBorders) {
             int newX = newHead.x();
             int newY = newHead.y();
-            if (newX < 0) {
-                newX = model.getWidth() - cellSize;
-            } else if (newX >= model.getWidth()) {
-                newX = 0;
-            }
-            if (newY < 0) {
-                newY = model.getHeight() - cellSize;
-            } else if (newY >= model.getHeight()) {
-                newY = 0;
-            }
+            if (newX < 0) newX = model.getWidth() - cellSize;
+            else if (newX >= model.getWidth()) newX = 0;
+            if (newY < 0) newY = model.getHeight() - cellSize;
+            else if (newY >= model.getHeight()) newY = 0;
             newHead = new GamePoint(newX, newY);
         }
 
         model.getSnake().addFirst(newHead);
         model.incrementMoves();
 
-        // 3. Collision Checks
+        // 3. Move Rival AI Snake if active
+        GamePoint enemyNewHead = null;
+        if (model.isRivalActive() && !model.getEnemySnake().isEmpty()) {
+            GamePoint enemyHead = model.getEnemySnake().getFirst();
+            List<GamePoint> enemyBlocked = new ArrayList<>(model.getEnemySnake());
+            enemyBlocked.addAll(model.getSnake());
+            enemyBlocked.addAll(model.getObstacles());
+
+            List<GamePoint> rivalPath = pathfinder.findPath(enemyHead, model.getFood(), model.getEnemySnake(), enemyBlocked, wrapBorders);
+            if (rivalPath == null || rivalPath.isEmpty()) {
+                rivalPath = pathfinder.findSafetyPath(enemyHead, model.getEnemySnake(), enemyBlocked, wrapBorders);
+            }
+
+            Direction rivalNextDir = model.getEnemyDirection();
+            if (rivalPath != null && !rivalPath.isEmpty()) {
+                rivalNextDir = getDirectionToTarget(enemyHead, rivalPath.get(0));
+                model.setEnemyDirection(rivalNextDir);
+            }
+
+            enemyNewHead = switch (rivalNextDir) {
+                case UP -> new GamePoint(enemyHead.x(), enemyHead.y() - cellSize);
+                case DOWN -> new GamePoint(enemyHead.x(), enemyHead.y() + cellSize);
+                case LEFT -> new GamePoint(enemyHead.x() - cellSize, enemyHead.y());
+                case RIGHT -> new GamePoint(enemyHead.x() + cellSize, enemyHead.y());
+            };
+
+            if (wrapBorders) {
+                int newX = enemyNewHead.x();
+                int newY = enemyNewHead.y();
+                if (newX < 0) newX = model.getWidth() - cellSize;
+                else if (newX >= model.getWidth()) newX = 0;
+                if (newY < 0) newY = model.getHeight() - cellSize;
+                else if (newY >= model.getHeight()) newY = 0;
+                enemyNewHead = new GamePoint(newX, newY);
+            }
+
+            model.getEnemySnake().addFirst(enemyNewHead);
+            
+            if (enemyNewHead.equals(model.getFood())) {
+                generateFood();
+                spawnObstacle();
+            } else {
+                model.getEnemySnake().removeLast();
+            }
+        }
+
+        // 4. Collision Evaluations
         boolean isWallCollision = false;
         if (model.getBorderMode().equals("Solid")) {
             isWallCollision = newHead.x() < 0 || newHead.x() >= model.getWidth() || newHead.y() < 0 || newHead.y() >= model.getHeight();
         }
         boolean isObstacleCollision = model.getObstacles().contains(newHead);
         boolean isSelfCollision = model.getSnake().size() != new HashSet<>(model.getSnake()).size();
+        boolean isRivalCollision = model.isRivalActive() && enemyNewHead != null && (model.getEnemySnake().contains(newHead) || model.getSnake().contains(enemyNewHead));
 
-        if (isWallCollision || isObstacleCollision || isSelfCollision) {
+        boolean shouldDie = isWallCollision || isObstacleCollision || isSelfCollision || isRivalCollision;
+
+        if (shouldDie) {
+            if (model.hasShield()) {
+                model.setHasShield(false);
+                soundManager.playShieldBreakSound();
+                if (isObstacleCollision) {
+                    model.getObstacles().remove(newHead);
+                    shouldDie = false; // Saved!
+                } else if (isWallCollision) {
+                    model.getSnake().removeFirst(); // Undo move
+                    shouldDie = false; // Saved!
+                }
+            }
+        }
+
+        if (shouldDie) {
             model.setGameOver(true);
             model.getSnake().removeFirst();
             model.updateHighScore();
             gameTimer.stop();
+            soundManager.playCollisionSound();
             if (hudCallback != null) {
                 hudCallback.onGameOver();
             }
         } else if (newHead.equals(model.getFood())) {
+            if (model.getFoodType().equals("Golden")) {
+                // Grow player snake by 2 extra nodes to add +3 score
+                GamePoint tail = model.getSnake().getLast();
+                model.getSnake().add(tail);
+                model.getSnake().add(tail);
+                soundManager.playSpecialEatSound();
+            } else if (model.getFoodType().equals("Shield")) {
+                model.setHasShield(true);
+                soundManager.playSpecialEatSound();
+            } else {
+                soundManager.playEatSound();
+            }
             generateFood();
             spawnObstacle();
         } else {

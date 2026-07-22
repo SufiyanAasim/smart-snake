@@ -1,1 +1,29 @@
-name: deploy.yml placeholder
+name: Deploy (Manual)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Compile and Package
+      run: |
+        mkdir -p out dist
+        javac -cp "lib/sqlite-jdbc.jar:lib/slf4j-api.jar:lib/slf4j-simple.jar" \
+              -d out \
+              src/project/*.java
+        jar --create \
+            --file dist/SmartSnake.jar \
+            --main-class project.Project \
+            -C out project
+        echo "Deploy artifact ready: dist/SmartSnake.jar"

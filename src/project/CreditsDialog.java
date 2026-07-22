@@ -10,7 +10,7 @@ import java.net.URI;
 
 /**
  * ==============================================================================
- * Project: Smart Snake Game
+ * Project: Smart Snake
  * Module: Credits Dialog
  * Authors:
  *   - Mohammad Sufiyan Aasim (sufiyanaasim@outlook.com)
@@ -34,12 +34,12 @@ public class CreditsDialog extends JDialog {
         JPanel headerPanel = new JPanel(new BorderLayout(5, 5));
         headerPanel.setBackground(new Color(20, 22, 28));
 
-        JLabel title = new JLabel("Smart Snake Game Credits");
+        JLabel title = new JLabel("Smart Snake Credits");
         title.setFont(new Font("Segoe UI", Font.BOLD, 18));
         title.setForeground(new Color(0, 229, 255)); // Neon Cyan
         headerPanel.add(title, BorderLayout.NORTH);
 
-        JLabel version = new JLabel("Version 5.0.0");
+        JLabel version = new JLabel("Version 7.0.0 (Battleserpent)");
         version.setFont(new Font("Segoe UI", Font.ITALIC, 12));
         version.setForeground(new Color(170, 180, 195));
         headerPanel.add(version, BorderLayout.EAST);

@@ -1,12 +1,12 @@
-# 🛠️ Smart Snake Game - Developer & Compilation Guide
+# 🛠️ Smart Snake - Developer & Compilation Guide
 
-This guide is designed for developers who wish to modify, compile, and package the Smart Snake Game Java source files and the C# native launcher.
+This guide is designed for developers who wish to modify, compile, and package the Smart Snake Java source files and the C# native launcher.
 
 ---
 
 ## 1. Project Directory Layout
 ```text
-Smart Snake Game/
+Smart Snake/
 ├── assets/                 # Image and icon assets (logo.png, logo.ico)
 ├── docs/                   # System guides and release notes
 ├── dist/                   # Output folder for compiled runnable JAR
@@ -14,7 +14,7 @@ Smart Snake Game/
 ├── src/project/            # Java Swing MVC source files
 ├── src_launcher/           # C# Launcher source files (.csproj and Program.cs)
 ├── build_and_run.ps1       # Compiles and packages Java files instantly
-└── SmartSnakeGame.exe      # Native Windows Launcher binary
+└── SmartSnake.exe      # Native Windows Launcher binary
 ```
 
 ---
@@ -30,7 +30,7 @@ To automate compiling of source files and packaging of the JAR:
    ```powershell
    ./build_and_run.ps1
    ```
-This script compiles Java classes using the linked libraries in `/lib`, packages them into `dist/SmartSnakeGame.jar`, and runs the game.
+This script compiles Java classes using the linked libraries in `/lib`, packages them into `dist/SmartSnake.jar`, and runs the game.
 
 ### Manual Compilation Commands
 If you prefer running commands manually:
@@ -40,7 +40,7 @@ If you prefer running commands manually:
    ```
 2. **Package JAR file**:
    ```bash
-   jar --create --file dist/SmartSnakeGame.jar --main-class project.Project -C out project
+   jar --create --file dist/SmartSnake.jar --main-class project.Project -C out project
    ```
 
 ---
@@ -58,9 +58,9 @@ The C# launcher program is stored under `src_launcher/`. To compile it into a si
    ```
 3. Copy the compiled executable to the root directory and rename it:
    ```powershell
-   Move-Item -Path "dist/Launcher.exe" -Destination "SmartSnakeGame.exe" -Force
+   Move-Item -Path "dist/Launcher.exe" -Destination "SmartSnake.exe" -Force
    ```
-This updates the **`SmartSnakeGame.exe`** binary. You do not need to rebuild the launcher unless you change its launching parameters or change the icon resource.
+This updates the **`SmartSnake.exe`** binary. You do not need to rebuild the launcher unless you change its launching parameters or change the icon resource.
 
 ---
 

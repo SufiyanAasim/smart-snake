@@ -1,6 +1,6 @@
 /**
  * ==============================================================================
- * Project: Smart Snake Game
+ * Project: Smart Snake
  * Module: GameModel (MVC Game State Data Manager)
  * Authors:
  *   - Mohammad Sufiyan Aasim (sufiyanaasim@outlook.com / GitHub: SufiyanAasim)
@@ -31,6 +31,15 @@ public class GameModel {
     private int movesCount = 0;
     private String borderMode = "Solid"; // "Solid" or "Wrap"
 
+    // v7.0.0 features variables
+    private String theme = "Cyberpunk"; // "Cyberpunk", "Vaporwave", "Matrix"
+    private String foodType = "Normal"; // "Normal", "Golden", "Shield"
+    private boolean hasShield = false;
+    private boolean mapEditing = false;
+    private boolean rivalActive = false;
+    private final List<GamePoint> enemySnake = new ArrayList<>();
+    private Direction enemyDirection = Direction.LEFT;
+
     // AI configurations
     private String aiMode = "Manual"; // "Manual", "A*", "Q-Learning"
     private List<GamePoint> currentPath = new ArrayList<>();
@@ -54,8 +63,18 @@ public class GameModel {
         newDirection = Direction.RIGHT;
         gameOver = false;
         paused = false;
-        // Keep gameStarted state so player doesn't have to re-press Space if not needed,
-        // but reset if it was game over.
+        hasShield = false;
+        foodType = "Normal";
+        
+        enemySnake.clear();
+        if (rivalActive) {
+            int startX = (width / cellSize - 4) * cellSize;
+            int startY = (height / cellSize - 4) * cellSize;
+            enemySnake.add(new GamePoint(startX, startY));
+            enemySnake.add(new GamePoint(startX + cellSize, startY));
+            enemySnake.add(new GamePoint(startX + cellSize * 2, startY));
+            enemyDirection = Direction.LEFT;
+        }
     }
 
     // Getters and Setters
@@ -108,4 +127,24 @@ public class GameModel {
 
     public boolean isPaused() { return paused; }
     public void setPaused(boolean paused) { this.paused = paused; }
+
+    public String getTheme() { return theme; }
+    public void setTheme(String theme) { this.theme = theme; }
+
+    public String getFoodType() { return foodType; }
+    public void setFoodType(String foodType) { this.foodType = foodType; }
+
+    public boolean hasShield() { return hasShield; }
+    public void setHasShield(boolean shield) { this.hasShield = shield; }
+
+    public boolean isMapEditing() { return mapEditing; }
+    public void setMapEditing(boolean editing) { this.mapEditing = editing; }
+
+    public boolean isRivalActive() { return rivalActive; }
+    public void setRivalActive(boolean active) { this.rivalActive = active; }
+
+    public List<GamePoint> getEnemySnake() { return enemySnake; }
+
+    public Direction getEnemyDirection() { return enemyDirection; }
+    public void setEnemyDirection(Direction direction) { this.enemyDirection = direction; }
 }

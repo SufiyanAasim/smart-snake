@@ -1,6 +1,6 @@
 # Release Cycle and Documentation
 
-This document describes the release cycle, packaging requirements, and codename guidelines for the Smart Snake Game project.
+This document describes the release cycle, packaging requirements, and codename guidelines for the Smart Snake project.
 
 ## Semantic Versioning
 We adhere strictly to Semantic Versioning (MAJOR.MINOR.PATCH):
@@ -10,11 +10,14 @@ We adhere strictly to Semantic Versioning (MAJOR.MINOR.PATCH):
 
 ## Release Codenames
 Codenames use a theme centered around **"Serpent"** without spaces:
-- **v1.0.0**: `retroserpent`
-- **v2.0.0**: `cyberserpent`
-- **v3.0.0**: `synthserpent`
-- **v4.0.0**: `vaultserpent`
+- **v1.0.0**: `Retroserpent`
+- **v2.0.0**: `Cyberserpent`
+- **v3.0.0**: `Synthserpent`
+- **v4.0.0**: `Vaultserpent`
+- **v5.0.0**: `Glowserpent`
+- **v6.0.0**: `Portalserpent`
+- **v7.0.0**: `Battleserpent`
 
 ## Release Branches
 - Code is developed in `develop` and merged into `release/vX.Y.Z` for staging.
-- Production stable releases are merged into `main` and tagged with `vX.Y.Z`.
+- Production stable releases are merged into `master` and tagged with `vX.Y.Z`.

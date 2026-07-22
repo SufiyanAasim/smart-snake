@@ -1,6 +1,6 @@
 /**
  * ==============================================================================
- * Project: Smart Snake Game
+ * Project: Smart Snake
  * Module: QLearningAgent (Q-table reinforcement learning model)
  * Authors:
  *   - Mohammad Sufiyan Aasim (sufiyanaasim@outlook.com / GitHub: SufiyanAasim)
@@ -33,22 +33,30 @@ public class QLearningAgent {
         return epsilon;
     }
 
-    // Epsilon-greedy action selection
+    // Epsilon-greedy action selection with random tie-breaking
     public int getAction(int state, boolean training) {
         if (training && random.nextFloat() < epsilon) {
             return random.nextInt(3); // Explore
         }
         
-        // Exploit: find max Q action
+        // Exploit: find max Q action with random tie-breaking
         float maxQ = -Float.MAX_VALUE;
-        int bestAction = 0;
+        List<Integer> bestActions = new ArrayList<>();
+        
         for (int i = 0; i < 3; i++) {
             if (qTable[state][i] > maxQ) {
                 maxQ = qTable[state][i];
-                bestAction = i;
+                bestActions.clear();
+                bestActions.add(i);
+            } else if (Math.abs(qTable[state][i] - maxQ) < 1e-5) {
+                bestActions.add(i);
             }
         }
-        return bestAction;
+        
+        if (bestActions.size() == 1) {
+            return bestActions.get(0);
+        }
+        return bestActions.get(random.nextInt(bestActions.size()));
     }
 
     // Q-value update

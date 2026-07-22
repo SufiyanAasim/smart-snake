@@ -8,7 +8,7 @@ import java.awt.event.ActionListener;
 
 /**
  * ==============================================================================
- * Project: Smart Snake Game
+ * Project: Smart Snake
  * Module: ConfirmDialog (Custom dark-themed neon confirm popup)
  * Authors:
  *   - Mohammad Sufiyan Aasim (sufiyanaasim@outlook.com / GitHub: SufiyanAasim)

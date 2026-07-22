@@ -1,6 +1,6 @@
 /**
  * ==============================================================================
- * Project: Smart Snake Game
+ * Project: Smart Snake
  * Module: GameView (MVC Graphical View Component)
  * Authors:
  *   - Mohammad Sufiyan Aasim (sufiyanaasim@outlook.com / GitHub: SufiyanAasim)
@@ -17,6 +17,8 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.BasicStroke;
 import java.awt.font.TextLayout;
+import java.awt.Point;
+import java.awt.Font;
 
 public class GameView extends JPanel {
     private final GameModel model;
@@ -36,6 +38,25 @@ public class GameView extends JPanel {
         } catch (java.io.IOException e) {
             System.err.println("Could not load logo image: " + e.getMessage());
         }
+
+        // Map creator wall painter mouse hooks
+        addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent e) {
+                if (model.isMapEditing()) {
+                    toggleObstacleAtMouse(e.getPoint(), true);
+                }
+            }
+        });
+
+        addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(java.awt.event.MouseEvent e) {
+                if (model.isMapEditing()) {
+                    toggleObstacleAtMouse(e.getPoint(), false);
+                }
+            }
+        });
     }
 
     private java.awt.image.BufferedImage bufferImage;
@@ -54,14 +75,38 @@ public class GameView extends JPanel {
         Graphics2D gBuffer = bufferImage.createGraphics();
         gBuffer.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+        // Determine theme colors dynamically based on model theme selection
+        Color bgColor, gridColor, boundaryColor, snakeColor, foodColor;
+        String activeTheme = model.getTheme();
+        if (activeTheme.equals("Vaporwave")) {
+            bgColor = new Color(34, 15, 48); // dark purple
+            gridColor = new Color(48, 20, 68);
+            boundaryColor = new Color(180, 0, 255); // glowing violet
+            snakeColor = new Color(0, 229, 255); // neon cyan
+            foodColor = new Color(255, 0, 127); // hot pink
+        } else if (activeTheme.equals("Matrix")) {
+            bgColor = new Color(0, 0, 0); // pitch black
+            gridColor = new Color(0, 30, 0);
+            boundaryColor = new Color(0, 180, 0); // matrix forest green
+            snakeColor = new Color(0, 255, 0); // matrix neon green
+            foodColor = new Color(120, 255, 0); // amber green
+        } else {
+            // Default Cyberpunk
+            bgColor = new Color(10, 12, 16);
+            gridColor = new Color(24, 28, 38);
+            boundaryColor = new Color(0, 229, 255); // glowing cyan
+            snakeColor = new Color(52, 199, 89); // neon green
+            foodColor = new Color(255, 59, 48); // neon red
+        }
+
         // Fill background of buffer
-        gBuffer.setColor(new Color(10, 12, 16));
+        gBuffer.setColor(bgColor);
         gBuffer.fillRect(0, 0, 800, 600);
 
         int cellSize = model.getCellSize();
 
-        // 1. Draw Grid Lines (Subtle dark lines for depth)
-        gBuffer.setColor(new Color(24, 28, 38));
+        // 1. Draw Grid Lines (Subtle lines for depth)
+        gBuffer.setColor(gridColor);
         for (int x = 0; x < model.getWidth(); x += cellSize) {
             gBuffer.drawLine(x, 0, x, model.getHeight());
         }
@@ -89,31 +134,80 @@ public class GameView extends JPanel {
                 gBuffer.setColor(new Color(70, 75, 85));
             }
 
-            // 4. Draw Food (Neon Red rectangular target)
-            gBuffer.setColor(new Color(255, 59, 48)); // Neon Red
-            gBuffer.fillRect(model.getFood().x() + 3, model.getFood().y() + 3, cellSize - 6, cellSize - 6);
-            // Glowing border
-            gBuffer.setColor(new Color(255, 120, 110));
-            gBuffer.drawRect(model.getFood().x() + 3, model.getFood().y() + 3, cellSize - 6, cellSize - 6);
+            // 4. Draw Food (Varied by type)
+            if (model.getFoodType().equals("Golden")) {
+                gBuffer.setColor(new Color(255, 215, 0)); // Gold
+                gBuffer.fillRoundRect(model.getFood().x() + 2, model.getFood().y() + 2, cellSize - 4, cellSize - 4, 4, 4);
+                gBuffer.setColor(Color.WHITE);
+                gBuffer.drawRoundRect(model.getFood().x() + 2, model.getFood().y() + 2, cellSize - 4, cellSize - 4, 4, 4);
+            } else if (model.getFoodType().equals("Shield")) {
+                gBuffer.setColor(new Color(0, 229, 255)); // Neon Cyan/Blue Orb
+                gBuffer.fillOval(model.getFood().x() + 2, model.getFood().y() + 2, cellSize - 4, cellSize - 4);
+                gBuffer.setColor(Color.WHITE);
+                gBuffer.drawOval(model.getFood().x() + 2, model.getFood().y() + 2, cellSize - 4, cellSize - 4);
+            } else {
+                // Normal food
+                gBuffer.setColor(foodColor);
+                gBuffer.fillRect(model.getFood().x() + 3, model.getFood().y() + 3, cellSize - 6, cellSize - 6);
+                gBuffer.setColor(new Color(Math.min(255, foodColor.getRed() + 60), Math.min(255, foodColor.getGreen() + 60), Math.min(255, foodColor.getBlue() + 60)));
+                gBuffer.drawRect(model.getFood().x() + 3, model.getFood().y() + 3, cellSize - 6, cellSize - 6);
+            }
 
-            // 5. Draw Snake with a beautiful fading green gradient
-            Color snakeColor = new Color(52, 199, 89); // Neon Green
+            // 5a. Draw Player Snake with fading theme gradient
+            Color currentSnakeColor = snakeColor;
             int size = model.getSnake().size();
             for (int i = 0; i < size; i++) {
                 GamePoint p = model.getSnake().get(i);
-                gBuffer.setColor(snakeColor);
+                gBuffer.setColor(currentSnakeColor);
                 
-                // Draw head slightly larger or as a round block
                 if (i == 0) {
                     gBuffer.fillRoundRect(p.x() + 1, p.y() + 1, cellSize - 2, cellSize - 2, 8, 8);
+                    
+                    // Draw a glowing shield outline bubble around head if hasShield is true
+                    if (model.hasShield()) {
+                        gBuffer.setColor(new Color(0, 229, 255, 180));
+                        gBuffer.setStroke(new BasicStroke(2.5f));
+                        gBuffer.drawOval(p.x() - 4, p.y() - 4, cellSize + 8, cellSize + 8);
+                        gBuffer.setStroke(new BasicStroke(1f));
+                    }
                 } else {
                     gBuffer.fillOval(p.x() + 1, p.y() + 1, cellSize - 2, cellSize - 2);
                 }
 
-                // Apply tail color multiplier
-                int newGreen = (int) Math.round(snakeColor.getGreen() * 0.85);
-                int newRed = (int) Math.round(snakeColor.getRed() * 0.85);
-                snakeColor = new Color(newRed, newGreen, 0);
+                // Apply tail color fading multiplier
+                int newGreen = (int) Math.round(currentSnakeColor.getGreen() * 0.85);
+                int newRed = (int) Math.round(currentSnakeColor.getRed() * 0.85);
+                int newBlue = (int) Math.round(currentSnakeColor.getBlue() * 0.85);
+                currentSnakeColor = new Color(newRed, newGreen, newBlue);
+            }
+
+            // 5b. Draw Rival AI Snake if active
+            if (model.isRivalActive() && !model.getEnemySnake().isEmpty()) {
+                Color rivalColor = new Color(255, 110, 0); // Orange/Red Neon
+                int enemySize = model.getEnemySnake().size();
+                for (int i = 0; i < enemySize; i++) {
+                    GamePoint p = model.getEnemySnake().get(i);
+                    gBuffer.setColor(rivalColor);
+                    if (i == 0) {
+                        gBuffer.fillRoundRect(p.x() + 1, p.y() + 1, cellSize - 2, cellSize - 2, 8, 8);
+                    } else {
+                        gBuffer.fillOval(p.x() + 1, p.y() + 1, cellSize - 2, cellSize - 2);
+                    }
+                    int newGreen = (int) Math.round(rivalColor.getGreen() * 0.85);
+                    int newRed = (int) Math.round(rivalColor.getRed() * 0.85);
+                    rivalColor = new Color(newRed, newGreen, 0);
+                }
+            }
+
+            // 5c. Draw Map Editor active text overlay
+            if (model.isMapEditing()) {
+                gBuffer.setColor(new Color(255, 170, 0, 40));
+                gBuffer.fillRect(0, 0, 800, 600);
+                gBuffer.setColor(new Color(255, 170, 0));
+                gBuffer.setFont(gBuffer.getFont().deriveFont(Font.BOLD, 18f));
+                String editorMsg = "MAP EDITOR ACTIVE - Click/Drag to Paint Walls";
+                int textX = (800 - gBuffer.getFontMetrics().stringWidth(editorMsg)) / 2;
+                gBuffer.drawString(editorMsg, textX, 40);
             }
 
             // 6. Draw Game Over or Pause Overlays
@@ -127,7 +221,7 @@ public class GameView extends JPanel {
         }
 
         // Draw Glowing Laser Border around the grid play area
-        gBuffer.setColor(new Color(0, 229, 255));
+        gBuffer.setColor(boundaryColor);
         gBuffer.setStroke(new BasicStroke(4f));
         gBuffer.drawRect(2, 2, 800 - 4, 600 - 4);
 
@@ -190,5 +284,59 @@ public class GameView extends JPanel {
             
             currentHeight += g2d.getFontMetrics().getHeight();
         }
+    }
+
+    private void toggleObstacleAtMouse(Point p, boolean toggle) {
+        int panelWidth = getWidth();
+        int panelHeight = getHeight();
+        if (panelWidth <= 0 || panelHeight <= 0) return;
+        
+        // Account for aspect ratio letterboxing offset
+        double targetAspect = 800.0 / 600.0;
+        int drawWidth = panelWidth;
+        int drawHeight = (int) (panelWidth / targetAspect);
+
+        if (drawHeight > panelHeight) {
+            drawHeight = panelHeight;
+            drawWidth = (int) (panelHeight * targetAspect);
+        }
+
+        int xOffset = (panelWidth - drawWidth) / 2;
+        int yOffset = (panelHeight - drawHeight) / 2;
+
+        // Map mouse coordinates to 800x600 buffer coordinates
+        int rx = p.x - xOffset;
+        int ry = p.y - yOffset;
+
+        if (rx < 0 || rx >= drawWidth || ry < 0 || ry >= drawHeight) return;
+
+        int bx = (int) (rx * 800.0 / drawWidth);
+        int by = (int) (ry * 600.0 / drawHeight);
+
+        int cellSize = model.getCellSize();
+        int gx = bx / cellSize * cellSize;
+        int gy = by / cellSize * cellSize;
+
+        // Bounds check
+        if (gx < 0 || gx >= model.getWidth() || gy < 0 || gy >= model.getHeight()) return;
+
+        GamePoint gridPt = new GamePoint(gx, gy);
+        // Do not block player snake, food, or enemy snake
+        if (model.getSnake().contains(gridPt) || gridPt.equals(model.getFood())) return;
+        if (model.isRivalActive() && model.getEnemySnake().contains(gridPt)) return;
+
+        if (toggle) {
+            if (model.getObstacles().contains(gridPt)) {
+                model.getObstacles().remove(gridPt);
+            } else {
+                model.getObstacles().add(gridPt);
+            }
+        } else {
+            // Dragging: just add wall obstacles
+            if (!model.getObstacles().contains(gridPt)) {
+                model.getObstacles().add(gridPt);
+            }
+        }
+        repaint();
     }
 }

@@ -1,227 +1,262 @@
-# Smart Snake Game
+<div align="center">
 
-![Java 21](https://img.shields.io/badge/Java-21-orange.svg)
-![License MIT](https://img.shields.io/badge/License-MIT-blue.svg)
-![Build Status](https://img.shields.io/badge/Build-passing-brightgreen.svg)
-![Codename](https://img.shields.io/badge/Codename-vaultserpent-purple.svg)
+<img src="assets/logo.png" alt="Smart Snake Logo" width="110" />
 
-## Project Overview
-Smart Snake Game is a secure, feature-rich offline desktop simulation application that transforms the classic retro game into a smart computational grid. Users can play manually or watch intelligent autonomous solvers (A* Pathfinding and BFS) and trained Machine Learning agents (Q-Learning) play the game with perfect precision. It features a modern neon HUD sidebar dashboard and persistent SQLite database logging for scores, historic matches, and stats.
+# Smart Snake
+
+**A Java desktop AI snake game with autonomous pathfinding, reinforcement learning, and a neon dashboard**
+
+[![Java 21](https://img.shields.io/badge/Java-21-f97316?style=flat&logo=openjdk&logoColor=white)](docs/guides/Developer%20Guide.md)
+[![Version](https://img.shields.io/badge/version-7.0.0%20Battleserpent-8b5cf6?style=flat)](docs/releases/v7.0.0.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=flat)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows-64748b?style=flat)]()
+[![Build](https://img.shields.io/badge/Build-passing-16a34a?style=flat)]()
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-0ea5e9?style=flat)](CONTRIBUTING.md)
+
+Play manually or watch A\*, BFS, and Q-Learning agents compete live — all offline, no installer, no accounts.
+
+[**Download .exe**](docs/releases/v7.0.0.md) · [**Changelog**](CHANGELOG.md) · [**Roadmap**](ROADMAP.md) · [**Report a Bug**](.github/ISSUE_TEMPLATE/bug_report.md)
+
+</div>
 
 ---
 
-## Features
-- **Classic Gameplay**: Traditional grid movement with input buffering and growing snake tail.
-- **A\* Pathfinding Autoplay**: Uses Manhattan distance heuristics to find the shortest path to food.
-- **BFS Safety Search Fallback**: Safety engine that steers the snake toward its own tail or loops empty space when trapped.
-- **Reinforcement Learning Agent**: A Q-learning agent with a compact state space (128 states) training in seconds.
-- **Neon HUD Sidebar Dashboard**: Dynamic control widgets, game speed sliders, epsilon parameters, and live path overlays.
-- **Relational Scoring Database**: Relational SQLite logging tracking scores, dates, modes, moves, and runtimes.
-- **Interactive Leaderboard Dialog**: Detailed scoreboard with options to search, delete rows, clear history, and export to CSV.
+## ✨ Features
+
+### 🧠 Autonomous AI Solvers
+- **A\* Pathfinder Autoplay** — Manhattan-distance heuristic finds the shortest path to food every tick
+- **BFS Safety Fallback** — steers toward the snake's own tail when A\* has no reachable route
+- **Q-Learning Agent** — compact 128-state reinforcement learning table that trains to completion in seconds; weights persisted to `q_table.txt`
+
+### 🎮 Manual & Hybrid Controls
+- Keyboard arrow-key gameplay with directional input buffering preventing self-collision
+- Switch between Manual, A\*, and Q-Learning mid-session from the sidebar — no restart needed
+
+### 📊 Neon HUD Sidebar Dashboard
+- Live metrics: Score, High Score, Steps, A\* Path Length, Path Efficiency Index, Q-Agent State Vector
+- Speed slider (1×–5×), epsilon (exploration) slider, A\* path-overlay toggle, Visual Theme selector, Border Physics selector
+
+### 🏆 Relational Scoring Database
+- SQLite score log tracking Name, Score, High Score, Mode, Steps, and Date
+- Interactive Leaderboard dialog with name search, row deletion, full wipe, and CSV export
+
+### ⚔️ Rival Competitor AI (v7.0.0)
+- Spawns an autonomous enemy snake that runs its own A\* + BFS engine, hunts food, and actively blocks the player
+- Hitting the rival's body triggers immediate Game Over
+
+### 🎵 Arcade Synth Audio Engine
+- Programmatic MIDI chiptune sounds — eat blips, shield pops, button hovers, and death crashes
+- Zero external audio dependencies; toggle with the sidebar checkbox
+
+### 🌈 Visual Themes & Power-ups
+- Three real-time rendering stylesheets: **Cyberpunk Neon**, **Vaporwave Pink**, **Matrix Green**
+- **Golden Apple** — rare 10 % spawn, grows snake by 2 extra nodes (+3 points)
+- **Shield Orb** — 5 % spawn, absorbs the next collision and shatters the obstacle
+
+### 🗺️ Map Creator & Obstacle Painter
+- Enable "Map Obstacle Editor Mode" to pause gameplay and draw custom wall layouts by clicking or dragging on the grid
+
+### 🌀 Toroidal Border Physics
+- Toggle between **Solid Borders** (death on contact) and **Wrap Borders** (portal teleportation)
+- Both A\* heuristics and Q-Learning sensors are fully portal-aware
 
 ---
 
-## Screenshots
-*(Add path previews or UI mockups here)*
-```text
-+-----------------------------------+--------------------+
-|                                   |  Mode: [A* Solver] |
-|              ( Snake )            |                    |
-|                o-o-o              |  Score: 32         |
-|                    o-o            |  High: 84          |
-|                      o            |  Steps: 218        |
-|                           [Food]  |                    |
-|                                   |  [Leaderboard]     |
-|                                   |  [Speed Slider]=== |
-+-----------------------------------+--------------------+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Project.java  (JFrame)                    │
+│   Sidebar HUD  ·  Button Panel  ·  Key Bindings  ·  Dialogs │
+└────────┬───────────────┬──────────────────┬─────────────────┘
+         │               │                  │
+         ▼               ▼                  ▼
+   GameModel.java   GameView.java   GameController.java
+   (State & Data)  (Swing Canvas)  (Timer · AI · Physics)
+                                          │
+                    ┌─────────────────────┼────────────────┐
+                    ▼                     ▼                ▼
+             Pathfinder.java    QLearningAgent.java   SoundManager.java
+             (A* · BFS)         (128-state Q-table)   (MIDI Synth)
+                                                           │
+                                                           ▼
+                                                  DatabaseManager.java
+                                                  (SQLite · JDBC)
 ```
 
+Full breakdown in [docs/architecture/Architecture.md](docs/architecture/Architecture.md).
+
 ---
 
-## Architecture
-This project follows a strict **Model-View-Controller (MVC)** pattern:
-* **Model**: Tracks grid occupancy, snake coordinates, current directions, dynamic obstacles, and score statistics.
-* **View**: Renders grid lines, neon borders, trailing tail gradients, and path overlay routes.
-* **Controller**: Drives game loops, monitors user keystrokes, triggers autoplay agents, and updates metrics in the dashboard.
+## 🛠️ Technology Stack
 
-```mermaid
-graph TD
-    Controller --> Model
-    Controller --> View
-    View --> Model
+| Layer | Technology |
+|-------|-----------|
+| Language | Java 21 (OpenJDK) |
+| GUI Framework | Java Swing & AWT |
+| Game Loop | `javax.swing.Timer` |
+| AI Pathfinding | A\* (Manhattan heuristic) + BFS safety |
+| Machine Learning | Tabular Q-Learning (128 states, ε-greedy) |
+| Audio Synthesis | `javax.sound.midi` (MIDI square-wave synth) |
+| Database | SQLite 3 via pre-bundled `sqlite-jdbc.jar` |
+| Architecture | Model-View-Controller (MVC) |
+| Build | PowerShell script · GNU Make · Apache Ant |
+| Launcher | C# .NET 10 single-file `.exe` with embedded icon |
+
+### Bundled dependencies (`lib/`)
+
+| JAR | Purpose |
+|-----|---------|
+| `sqlite-jdbc.jar` | SQLite JDBC driver — relational score persistence |
+| `slf4j-api.jar` | SLF4J logging API |
+| `slf4j-simple.jar` | SLF4J simple logger implementation |
+
+---
+
+## 🚀 Getting Started
+
+### Requirements
+- Windows OS
+- Java Development Kit (JDK) 21 or higher
+
+### Quick launch
+Double-click **`SmartSnake.exe`** in the repository root — no installation required.
+
+### Clone and build from source
+
+```bash
+git clone https://github.com/SufiyanAasim/smart-snake.git
+cd smart-snake
 ```
 
----
-
-## Technology Stack
-- **Core Platform**: Java 21 (OpenJDK)
-- **GUI Framework**: Java Swing & AWT
-- **Database Engine**: SQLite 3 (via local JDBC driver)
-- **Design Paradigm**: Model-View-Controller (MVC)
-- **Build Utilities**: PowerShell script, GNU Make, Apache Ant
-
----
-
-## Requirements
-- **Runtime Environment**: Java Development Kit (JDK) 21 or higher.
-- **Operating System**: Windows, Linux, or macOS.
-- **Database Driver**: SQLite JDBC (pre-packaged in `lib/`).
-
----
-
-## Installation
-1. Clone the repository locally:
-   ```bash
-   git clone https://github.com/SufiyanAasim/smart-snake-game.git
-   ```
-2. Navigate to the project directory:
-   ```bash
-   cd smart-snake-game
-   ```
-
----
-
-## Quick Start
-On Windows, you can launch the game instantly by double-clicking the native executable **`SmartSnakeGame.exe`** directly in the root directory!
-
-Alternatively, to compile, package, and execute the game from source:
 ```powershell
+# Compile, package, and run in one step
 ./build_and_run.ps1
 ```
 
-### Prerequisites
-To run the game, you only need to ensure the following:
-1. **Java Development Kit (JDK) 21 or JRE 21** must be installed on your machine so the system can run Java classes.
-2. **Nothing else is required to download!** All database links, drivers (`sqlite-jdbc.jar`), loggers (`slf4j`), and pretrained reinforcement learning configurations (`q_table.txt`) are already pre-packaged in the repository.
+Or step-by-step:
 
----
-
-## Configuration
-Game settings such as default width, height, and game speeds are configured in `nbproject/project.properties` and the `.env` settings file.
-
----
-
-## Environment Variables
-The application reads from `.env` at boot. Standard parameters:
-
-| Variable | Required | Default | Description |
-| --- | --- | --- | --- |
-| `APP_ENV` | No | `development` | Environment mode (`development` or `production`). |
-| `DB_PATH` | Yes | `data/scores.db` | Directory path pointing to the SQLite database file. |
-| `GAME_WIDTH` | No | `800` | Grid play area width in pixels. |
-| `GAME_HEIGHT` | No | `600` | Grid play area height in pixels. |
-| `PLAYER_NAME` | No | `Guest` | Default active player login name. |
-
----
-
-## Running Locally
-Compile and package the runnable JAR using:
 ```powershell
-# Using powershell wrapper
-./build_and_run.ps1
-
-# Using Makefile
-make
-make run
-```
-The executable is generated at `dist/SmartSnakeGame.jar`.
-
----
-
-## Docker
-1. Build the Docker image containing JDK 21 compilation:
-   ```bash
-   docker build -t smart-snake-game .
-   ```
-2. Run the container:
-   ```bash
-   docker-compose up
-   ```
-   *(Note: Display forwarding configuration is required to render the GUI).*
-
----
-
-## Cloud Deployment
-As an offline desktop client, cloud deployments are not natively supported. Remote scoring endpoints can be integrated in future phases.
-
----
-
-## API Documentation
-There are no external REST APIs. See code structure guides in [docs/guides/Developer Guide.md](file:///d:/Completed%20Github%20Projects%20%28Fully%20Tested%20&%20Deployed%29/Smart%20Snake%20Game/docs/guides/Developer%20Guide.md) for internal Java class signatures.
-
----
-
-## Project Structure
-```text
-Smart Snake Game/
-├── .github/                # Bug, PR templates, and CI workflows
-├── docs/                   # Relevant documentation guides
-├── src/project/            # Source package (Java Swing classes)
-├── lib/                    # Pre-packaged JAR dependencies (SQLite JDBC)
-├── tests/                  # Local testing verification scripts
-├── dist/                   # Compiled standalone runnable JAR
-└── build_and_run.ps1       # Automated build compiler script
+javac -cp "lib/sqlite-jdbc.jar;lib/slf4j-api.jar;lib/slf4j-simple.jar" -d out src/project/*.java
+jar --create --file dist/SmartSnake.jar --main-class project.Project -C out project
+java -cp "dist/SmartSnake.jar;lib/sqlite-jdbc.jar;lib/slf4j-api.jar;lib/slf4j-simple.jar" project.Project
 ```
 
----
-
-## Testing
-Unit and visual loop tests are stored under `/tests`. To execute manual tests:
-1. Run `./build_and_run.ps1`
-2. Test controller modes (Keyboard, A*, Q-Learning) in the UI sidebar.
+Full setup details in [docs/guides/Developer Guide.md](docs/guides/Developer%20Guide.md).
 
 ---
 
-## Performance
-- **Pathfinding**: $O(V + E)$ where $V = 1200$ (grid size). Calculates path in < 1ms on average.
-- **Q-Learning**: Compact state tables process 10,000 games in under 3 seconds during headless training.
+## ⚙️ Configuration
+
+The application reads optional settings from `.env` at boot:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DB_PATH` | `data/scores.db` | Path to the SQLite score database |
+| `GAME_WIDTH` | `800` | Play area width in pixels |
+| `GAME_HEIGHT` | `600` | Play area height in pixels |
+| `PLAYER_NAME` | `Guest` | Default player name pre-filled on game-over |
+| `APP_ENV` | `development` | Environment mode |
+
+Copy `.env.example` to `.env` and adjust as needed.
 
 ---
 
-## Security
-- **Data Privacy**: Local database file execution with parameterized statements preventing SQL injection.
-- **Input Sanitization**: Score names are validated against regex parameters.
+## 🗂️ Project Structure
+
+```
+smart-snake/
+├── .github/                # Issue/PR templates and CI configuration
+├── assets/                 # Logo and icon assets
+├── docs/
+│   ├── architecture/       # System architecture documentation
+│   ├── guides/             # Developer and user guides
+│   ├── releases/           # Per-version release notes (v1–v7)
+│   └── troubleshooting/    # Common issues and fixes
+├── lib/                    # Bundled JAR dependencies
+├── src/project/            # Java MVC source package
+│   ├── Project.java            # Main JFrame · sidebar · key bindings
+│   ├── GameModel.java          # State: snake, food, score, flags
+│   ├── GameView.java           # Swing canvas renderer
+│   ├── GameController.java     # Timer · AI steering · collision
+│   ├── Pathfinder.java         # A* + BFS pathfinding engine
+│   ├── QLearningAgent.java     # 128-state Q-learning agent
+│   ├── SoundManager.java       # MIDI chiptune synthesizer
+│   ├── DatabaseManager.java    # SQLite score persistence
+│   ├── LeaderboardDialog.java  # Score browser dialog
+│   ├── CreditsDialog.java      # Credits overlay
+│   ├── HelpDialog.java         # Controls help dialog
+│   └── NameInputDialog.java    # Game-over name entry
+├── src_launcher/           # C# .NET launcher source (embeds icon)
+├── dist/                   # Compiled SmartSnake.jar output
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── README.md
+├── RELEASE.md
+├── ROADMAP.md
+├── SmartSnake.exe          # Native Windows launcher
+└── build_and_run.ps1       # One-command build & run script
+```
 
 ---
 
-## Contributing
-Please read [CONTRIBUTING.md](file:///d:/Completed%20Github%20Projects%20%28Fully%20Tested%20&%20Deployed%29/Smart%20Snake%20Game/CONTRIBUTING.md) for details on branch naming formats, Conventional Commit styles, and testing processes.
+## 🧪 Testing
+
+There is no automated test suite yet — all modes are validated manually after each change.
+
+Manual validation checklist:
+1. Start a game and confirm the Pause button switches to **Resume** when pressed.
+2. Press Resume and confirm the button returns to **Pause** and speed is unchanged.
+3. Open Leaderboard, Help, or Credits while the game is running — confirm auto-pause.
+4. Click **Exit** and confirm the application closes cleanly.
+5. Enable Rival AI and confirm collision with the enemy triggers Game Over.
+6. Toggle all three Visual Themes mid-game.
+7. Switch Border Physics from Solid to Wrap and confirm the snake teleports.
 
 ---
 
-## Roadmap
-For the full interactive timeline, refer to [ROADMAP.md](file:///d:/Completed%20Github%20Projects%20%28Fully%20Tested%20&%20Deployed%29/Smart%20Snake%20Game/ROADMAP.md).
-- **v1.0.0**: Classic base.
-- **v2.0.0**: AI solvers.
-- **v3.0.0**: Neon dashboard.
-- **v4.0.0**: persistent scores.
+## 🛡️ Security
+
+Fully offline, single-user desktop application — no network calls, no accounts, no cloud. The only persisted state is a local SQLite score database and `q_table.txt`. All database queries use parameterized statements to prevent SQL injection. See [SECURITY.md](SECURITY.md) to report a vulnerability.
 
 ---
 
-## FAQ
-**Q: Can I load custom Q-tables?**  
-A: Yes, the agent persistent weights are loaded from `q_table.txt`.
+## 🤝 Contributors
 
-**Q: Game doesn't compile on my machine?**  
-A: Check that JDK 21 bin folder is on your system path.
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/SufiyanAasim">
+        <img src="https://github.com/SufiyanAasim.png" width="72" alt="SufiyanAasim"/><br/>
+        <sub><b>Mohammad Sufiyan Aasim</b></sub>
+      </a><br/>
+      <sub>System Architect · AI/ML · Build & Release</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/FahadBinNasir">
+        <img src="https://github.com/FahadBinNasir.png" width="72" alt="FahadBinNasir"/><br/>
+        <sub><b>Fahad Bin Nasir</b></sub>
+      </a><br/>
+      <sub>UI Controls · Layout · Testing</sub>
+    </td>
+  </tr>
+</table>
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) to get involved.
 
 ---
 
-## Troubleshooting
-Refer to the detailed guide in [docs/troubleshooting/Troubleshooting.md](file:///d:/Completed%20Github%20Projects%20%28Fully%20Tested%20&%20Deployed%29/Smart%20Snake%20Game/docs/troubleshooting/Troubleshooting.md).
+## 📄 License
+
+[MIT License](LICENSE) © 2026 Smart Snake Contributors.
 
 ---
 
-## License
-Distributed under the MIT License. See [LICENSE](file:///d:/Completed%20Github%20Projects%20%28Fully%20Tested%20&%20Deployed%29/Smart%20Snake%20Game/LICENSE) for more details.
+<div align="center">
 
----
+⭐ **Star this repo if you enjoyed watching the AI play.**
 
-## Acknowledgements
-- Modern Swing UI guides.
-- Reinforcement learning state reductions research.
+[Report Bug](.github/ISSUE_TEMPLATE/bug_report.md) · [Request Feature](.github/ISSUE_TEMPLATE/feature_request.md) · [Changelog](CHANGELOG.md)
 
----
-
-## Support
-Open a GitHub issue or contact Mohammad Sufiyan Aasim at support@sufiyanaasim.com.
+</div>

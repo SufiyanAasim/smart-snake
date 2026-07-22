@@ -1,3 +1,3 @@
-# Smart Snake Game Issue Template - question
+# Smart Snake Issue Template - question
 
 Please provide details for the issue.

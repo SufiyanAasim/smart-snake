@@ -8,7 +8,7 @@ import java.awt.event.ActionListener;
 
 /**
  * ==============================================================================
- * Project: Smart Snake Game
+ * Project: Smart Snake
  * Module: HelpDialog (Custom dark-themed gameplay instructions dialog)
  * Authors:
  *   - Mohammad Sufiyan Aasim (sufiyanaasim@outlook.com / GitHub: SufiyanAasim)

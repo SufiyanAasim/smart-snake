@@ -1,1 +1,50 @@
-name: lint.yml placeholder
+name: Lint & Style Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Check for trailing whitespace (advisory)
+      run: |
+        echo "Checking for trailing whitespace in Java source files..."
+        if grep -rn ' $' src/project/*.java 2>/dev/null; then
+          echo "⚠️  Advisory: trailing whitespace found in the lines above."
+        else
+          echo "✅ No trailing whitespace found."
+        fi
+
+    - name: Check file encoding (advisory)
+      run: |
+        echo "Checking source file encoding..."
+        file src/project/*.java | head -20
+        echo "✅ Encoding check complete."
+
+    - name: Verify required source files exist
+      run: |
+        echo "Verifying required Java source files..."
+        for f in \
+          src/project/Project.java \
+          src/project/GameController.java \
+          src/project/GameModel.java \
+          src/project/GameView.java \
+          src/project/Pathfinder.java \
+          src/project/QLearningAgent.java \
+          src/project/DatabaseManager.java \
+          src/project/SoundManager.java; do
+          if [ -f "$f" ]; then
+            echo "  ✅ $f"
+          else
+            echo "  ❌ MISSING: $f"
+            exit 1
+          fi
+        done
+        echo "✅ All required source files present."

@@ -1,1 +1,16 @@
-name: docker.yml placeholder
+name: Docker Build
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Build Docker image
+      run: docker build -t smart-snake:latest .
