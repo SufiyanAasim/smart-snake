@@ -1,16 +1,16 @@
-# 🏛️ Smart Snake Game - Architecture & Systems Design
+# 🏛️ Smart Snake - Architecture & Systems Design
 
-This document details the architectural layout, package collaborations, and system integrations of the Smart Snake Game suite.
+This document details the architectural layout, package collaborations, and system integrations of the Smart Snake suite.
 
 ---
 
 ## 1. System Overview
-Smart Snake Game is structured as a dual-language application consisting of a **Core Java 21 Swing game engine** and a **Native Windows C# Bootstrap Launcher**.
+Smart Snake is structured as a dual-language application consisting of a **Core Java 21 Swing game engine** and a **Native Windows C# Bootstrap Launcher**.
 
 ```mermaid
 graph TD
-    Launcher[SmartSnakeGame.exe C# Launcher] -->|Spawns JVM process| JVM[Java Virtual Machine JRE 21]
-    JVM -->|Runs| App[Smart Snake Game Java Engine]
+    Launcher[SmartSnake.exe C# Launcher] -->|Spawns JVM process| JVM[Java Virtual Machine JRE 21]
+    JVM -->|Runs| App[Smart Snake Java Engine]
     App -->|Reads/Writes| DB[(Local SQLite Database data/scores.db)]
     App -->|Loads Weights| QT[Q-Table Persistence q_table.txt]
 ```
@@ -30,16 +30,20 @@ graph LR
 ### 1. Model (`GameModel.java`)
 Manages structural data states and business variables without any GUI components:
 * Coordinates of the snake nodes (using `GamePoint` structures).
-* Food location and active list of dynamic obstacles.
-* Player scores, high scores, steps count, active AI modes, and path arrays.
+* Food location, food type (Normal, Golden, Shield), and active list of dynamic obstacles.
+* Player scores, high scores, moves count, active AI modes, and path arrays.
 * **Border Mode State**: Toggle between `"Solid"` (death on border collision) and `"Wrap"` (portal wrap-around teleportation).
+* **Rival Competitor State**: Tracks the enemy snake coordinates and directions.
+* **Map Editor State**: Flag controlling active level creation/obstacle painting.
+* **Theme Selection**: Tracks active visual stylesheet theme (Cyberpunk, Vaporwave, Matrix).
 
 ### 2. View (`GameView.java`)
 Manages graphics rendering using Java AWT/Swing:
 * Extends `JPanel` to draw grid layers.
-* **Render-to-Texture Scaling**: Draws all elements onto a fixed `800x600` `BufferedImage` first, and then paints the scaled image to fit the panel bounds. This supports dynamic resizing and fullscreen layouts without modifying grid calculations.
+* **Render-to-Texture Scaling**: Draws all elements onto a fixed `800x600` `BufferedImage` first, and then paints the scaled image to fit the panel bounds, preserving the 4:3 aspect ratio with centering and letterboxing.
 * Paints the snake gradient tail, glowing target food, dynamic barriers, and translucent A* path overlays.
-* **Neon Lasers Boundary**: Draws a glowing cyan border around the active grid boundary.
+* **Themes Styling**: Resolves rendering colors dynamically based on the model's active stylesheet.
+* **Map Editor Mouse Mapping**: Captures drag and click events, maps coordinates to 800x600 coordinates, and paints custom walls.
 
 ### 3. Controller (`GameController.java`)
 Coordinates the application timeline and user inputs:
@@ -47,7 +51,8 @@ Coordinates the application timeline and user inputs:
 * Delegates keyboard actions to manual direction changes and captures `F11` for fullscreen toggles.
 * **Toroidal Coordinate Translation**: Wraps the snake's head coordinate when exiting boundaries under Wrap mode.
 * Evaluates path updates from `Pathfinder` or Q-learning predictions on each clock tick.
-* Updates the live sidebar panel metrics using `HUDUpdateCallback` interfaces.
+* **Rival Competitor AI**: Computes the rival AI snake path and tick movements in parallel.
+* **Sound Synthesis Manager** (`SoundManager.java`): Drives native MIDI chiptunes and audio effects (eating, button hover, shield break, crash).
 
 ---
 
@@ -72,7 +77,7 @@ The game features two distinct autonomous decision-making engines:
 
 ---
 
-## 5. Native Windows C# Launcher (`SmartSnakeGame.exe`)
+## 5. Native Windows C# Launcher (`SmartSnake.exe`)
 To make Java executable natively on Windows with customized presentation:
 * **C# Bootstrapper**: Built from `src_launcher/Program.cs` and compiled with .NET SDK.
 * **Hiding Consoles**: Launches Java via `javaw.exe` (instead of `java.exe`) which hides command prompts.

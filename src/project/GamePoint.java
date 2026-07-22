@@ -1,6 +1,6 @@
 /**
  * ==============================================================================
- * Project: Smart Snake Game
+ * Project: Smart Snake
  * Module: GamePoint (Immutable coordinate record wrapper)
  * Authors:
  *   - Mohammad Sufiyan Aasim (sufiyanaasim@outlook.com / GitHub: SufiyanAasim)

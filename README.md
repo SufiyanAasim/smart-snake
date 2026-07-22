@@ -1,12 +1,12 @@
-# Smart Snake Game
+# Smart Snake
 
 ![Java 21](https://img.shields.io/badge/Java-21-orange.svg)
 ![License MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Build Status](https://img.shields.io/badge/Build-passing-brightgreen.svg)
-![Codename](https://img.shields.io/badge/Codename-vaultserpent-purple.svg)
+![Codename](https://img.shields.io/badge/Codename-battleserpent-purple.svg)
 
 ## Project Overview
-Smart Snake Game is a secure, feature-rich offline desktop simulation application that transforms the classic retro game into a smart computational grid. Users can play manually or watch intelligent autonomous solvers (A* Pathfinding and BFS) and trained Machine Learning agents (Q-Learning) play the game with perfect precision. It features a modern neon HUD sidebar dashboard and persistent SQLite database logging for scores, historic matches, and stats.
+Smart Snake is a secure, feature-rich offline desktop simulation application that transforms the classic retro game into a smart computational grid. Users can play manually or watch intelligent autonomous solvers (A* Pathfinding and BFS) and trained Machine Learning agents (Q-Learning) play the game with perfect precision. It features a modern neon HUD sidebar dashboard and persistent SQLite database logging for scores, historic matches, and stats.
 
 ---
 
@@ -18,6 +18,12 @@ Smart Snake Game is a secure, feature-rich offline desktop simulation applicatio
 - **Neon HUD Sidebar Dashboard**: Dynamic control widgets, game speed sliders, epsilon parameters, and live path overlays.
 - **Relational Scoring Database**: Relational SQLite logging tracking scores, dates, modes, moves, and runtimes.
 - **Interactive Leaderboard Dialog**: Detailed scoreboard with options to search, delete rows, clear history, and export to CSV.
+- **Toroidal portal coordinates wrapping**: Edge wrapping movement modes selectable in settings.
+- **Arcade Synth Audio Engine**: Lightweight native Java MIDI chiptune sound waves playing eat blips, shield pops, button hovers, and death crashes.
+- **Visual Theme Customizer**: Real-time color stylesheets swaps (Cyberpunk Neon, Vaporwave Pink, Matrix Green).
+- **Power-up Targets**: Gold Apples (+3 score booster) and Blue Shield Orbs (head bubble outline shield saving player from crash defeat by shattering obstacles).
+- **Map Creator Painter**: Mouse painting mode to build custom wall layouts directly on canvas.
+- **Rival Competitor AI Snake**: Spatial battle arena against an enemy snake chasing food and blocking player.
 
 ---
 
@@ -56,6 +62,7 @@ graph TD
 ## Technology Stack
 - **Core Platform**: Java 21 (OpenJDK)
 - **GUI Framework**: Java Swing & AWT
+- **Audio Synthesizer**: javax.sound.midi (Standard Java MIDI Synthesizer)
 - **Database Engine**: SQLite 3 (via local JDBC driver)
 - **Design Paradigm**: Model-View-Controller (MVC)
 - **Build Utilities**: PowerShell script, GNU Make, Apache Ant
@@ -82,7 +89,7 @@ graph TD
 ---
 
 ## Quick Start
-On Windows, you can launch the game instantly by double-clicking the native executable **`SmartSnakeGame.exe`** directly in the root directory!
+On Windows, you can launch the game instantly by double-clicking the native executable **`SmartSnake.exe`** directly in the root directory!
 
 Alternatively, to compile, package, and execute the game from source:
 ```powershell
@@ -97,7 +104,7 @@ To run the game, you only need to ensure the following:
 ---
 
 ## Configuration
-Game settings such as default width, height, and game speeds are configured in `nbproject/project.properties` and the `.env` settings file.
+Game settings such as default width, height, and game speeds are configured in the `.env` settings file.
 
 ---
 
@@ -124,7 +131,7 @@ Compile and package the runnable JAR using:
 make
 make run
 ```
-The executable is generated at `dist/SmartSnakeGame.jar`.
+The executable is generated at `dist/SmartSnake.jar`.
 
 ---
 
@@ -153,12 +160,10 @@ There are no external REST APIs. See code structure guides in [docs/guides/Devel
 
 ## Project Structure
 ```text
-Smart Snake Game/
-├── .github/                # Bug, PR templates, and CI workflows
-├── docs/                   # Relevant documentation guides
-├── src/project/            # Source package (Java Swing classes)
+Smart Snake/
+├── docs/                   # Documentation guides & release notes
+├── src/project/            # Source package (Java Swing MVC classes)
 ├── lib/                    # Pre-packaged JAR dependencies (SQLite JDBC)
-├── tests/                  # Local testing verification scripts
 ├── dist/                   # Compiled standalone runnable JAR
 └── build_and_run.ps1       # Automated build compiler script
 ```
@@ -166,7 +171,7 @@ Smart Snake Game/
 ---
 
 ## Testing
-Unit and visual loop tests are stored under `/tests`. To execute manual tests:
+To execute manual tests:
 1. Run `./build_and_run.ps1`
 2. Test controller modes (Keyboard, A*, Q-Learning) in the UI sidebar.
 
@@ -191,10 +196,13 @@ Please read [CONTRIBUTING.md](file:///d:/Completed%20Github%20Projects%20%28Full
 
 ## Roadmap
 For the full interactive timeline, refer to [ROADMAP.md](file:///d:/Completed%20Github%20Projects%20%28Fully%20Tested%20&%20Deployed%29/Smart%20Snake%20Game/ROADMAP.md).
-- **v1.0.0**: Classic base.
-- **v2.0.0**: AI solvers.
-- **v3.0.0**: Neon dashboard.
-- **v4.0.0**: persistent scores.
+- **v1.0.0 (`retroserpent`)**: Establish baseline classic play.
+- **v2.0.0 (`cyberserpent`)**: A* Pathfinder and Q-learning ML.
+- **v3.0.0 (`synthserpent`)**: Model-View-Controller refactoring & Neon HUD.
+- **v4.0.0 (`vaultserpent`)**: SQLite persistent scoreboard.
+- **v5.0.0 (`glowserpent`)**: Aspect ratio resizes and custom modal dialogs.
+- **v6.0.0 (`portalserpent`)**: Toroidal coordinate boundary edge wrapping.
+- **v7.0.0 (`battleserpent`)**: Rival AI, chiptune sound synthesis, power-ups, themes, and map painter.
 
 ---
 
@@ -217,11 +225,9 @@ Distributed under the MIT License. See [LICENSE](file:///d:/Completed%20Github%2
 
 ---
 
-## Acknowledgements
-- Modern Swing UI guides.
-- Reinforcement learning state reductions research.
+## Contributors
 
----
-
-## Support
-Open a GitHub issue or contact Mohammad Sufiyan Aasim at support@sufiyanaasim.com.
+| Contributor | Primary Areas |
+| --- | --- |
+| Mohammad Sufiyan Aasim | Main application integration, UI integration, pause/resume workflow, exit workflow, product naming consistency, and build and release management |
+| Fahad | Supporting UI control implementation, layout validation, testing of pause/resume behaviour, cross-checking gameplay-state consistency, and assigned component maintenance |

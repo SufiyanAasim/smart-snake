@@ -10,7 +10,7 @@ import java.awt.event.KeyEvent;
 
 /**
  * ==============================================================================
- * Project: Smart Snake Game
+ * Project: Smart Snake
  * Module: NameInputDialog (Custom dark-themed scoreboard prompt dialog)
  * Authors:
  *   - Mohammad Sufiyan Aasim (sufiyanaasim@outlook.com / GitHub: SufiyanAasim)

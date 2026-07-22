@@ -1,6 +1,6 @@
 /**
  * ==============================================================================
- * Project: Smart Snake Game
+ * Project: Smart Snake
  * Module: Project (Main Window & Sidebar HUD Dashboard)
  * Authors:
  *   - Mohammad Sufiyan Aasim (sufiyanaasim@outlook.com / GitHub: SufiyanAasim)
@@ -36,10 +36,17 @@ public class Project extends JFrame {
     private JLabel lblPathLenVal;
     private JLabel lblEfficiencyVal;
     private JLabel lblStateVal;
+    private JButton btnPause;
 
     public Project() {
-        super("Smart Snake Game");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        super("Smart Snake");
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                exitApplication();
+            }
+        });
         setResizable(true); // Enable window resizing
 
         // Load window icon
@@ -89,6 +96,10 @@ public class Project extends JFrame {
                 lblPathLenVal.setText(pathLength > 0 ? String.valueOf(pathLength) : "N/A");
                 lblEfficiencyVal.setText(efficiency);
                 lblStateVal.setText(stateVector);
+                
+                if (btnPause != null) {
+                    btnPause.setText(model.isPaused() ? "Resume" : "Pause");
+                }
             }
 
             @Override
@@ -120,10 +131,13 @@ public class Project extends JFrame {
         // Title Header
         JPanel titlePanel = new JPanel(new BorderLayout());
         titlePanel.setBackground(new Color(20, 22, 28));
-        titlePanel.setMaximumSize(new Dimension(300, 70));
-        titlePanel.setBorder(new EmptyBorder(15, 15, 15, 15));
+        titlePanel.setPreferredSize(new Dimension(300, 50));
+        titlePanel.setMinimumSize(new Dimension(300, 50));
+        titlePanel.setMaximumSize(new Dimension(300, 50));
+        titlePanel.setBorder(new EmptyBorder(12, 10, 12, 10));
+        titlePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel title = new JLabel("SYNTH SERPENT");
+        JLabel title = new JLabel("SMART SNAKE");
         title.setFont(new Font("Segoe UI", Font.BOLD, 20));
         title.setForeground(new Color(0, 229, 255)); // Neon blue cyan
         title.setHorizontalAlignment(SwingConstants.CENTER);
@@ -134,7 +148,7 @@ public class Project extends JFrame {
         panel.add(Box.createVerticalStrut(10));
 
         // --- SECTION 1: MODE CONTROLS ---
-        JPanel sectionModes = createSectionContainer("CONTROLLER MODE");
+        JPanel sectionModes = createSectionContainer("CONTROLLER MODE", 120);
         
         JRadioButton rbManual = new JRadioButton("Manual (Keyboard)", true);
         JRadioButton rbAStar = new JRadioButton("A* Pathfinder Autoplay");
@@ -182,7 +196,7 @@ public class Project extends JFrame {
         panel.add(Box.createVerticalStrut(10));
 
         // --- SECTION 2: SPEED & OPTIONS ---
-        JPanel sectionOptions = createSectionContainer("SPEED & SETTINGS");
+        JPanel sectionOptions = createSectionContainer("SPEED & SETTINGS", 385);
         
         // Speed slider
         JLabel lblSpeed = createConfigLabel("Simulation Speed: 2x");
@@ -254,23 +268,108 @@ public class Project extends JFrame {
             }
         });
 
+        // Visual Theme selector
+        JLabel lblTheme = createConfigLabel("Visual Theme Stylesheet:");
+        String[] themes = { "Cyberpunk Neon", "Vaporwave Pink", "Matrix Green" };
+        JComboBox<String> comboTheme = new JComboBox<>(themes);
+        comboTheme.setBackground(new Color(35, 39, 48));
+        comboTheme.setForeground(Color.WHITE);
+        comboTheme.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        comboTheme.setFocusable(false);
+        comboTheme.setMaximumSize(new Dimension(280, 25));
+        comboTheme.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String selected = (String) comboTheme.getSelectedItem();
+                if (selected != null) {
+                    if (selected.contains("Vaporwave")) {
+                        model.setTheme("Vaporwave");
+                    } else if (selected.contains("Matrix")) {
+                        model.setTheme("Matrix");
+                    } else {
+                        model.setTheme("Cyberpunk");
+                    }
+                }
+                view.repaint();
+                requestFocusInWindow();
+            }
+        });
+
+        // Spawn Rival AI checkbox
+        JCheckBox cbRival = new JCheckBox("Spawn Rival AI Competitor", false);
+        cbRival.setBackground(new Color(25, 27, 34));
+        cbRival.setForeground(new Color(170, 180, 195));
+        cbRival.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        cbRival.setFocusable(false);
+        cbRival.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                model.setRivalActive(cbRival.isSelected());
+                controller.resetGame();
+                requestFocusInWindow();
+            }
+        });
+
+        // Map Obstacle Editor checkbox
+        JCheckBox cbMapEdit = new JCheckBox("Map Obstacle Editor Mode", false);
+        cbMapEdit.setBackground(new Color(25, 27, 34));
+        cbMapEdit.setForeground(new Color(170, 180, 195));
+        cbMapEdit.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        cbMapEdit.setFocusable(false);
+        cbMapEdit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                model.setMapEditing(cbMapEdit.isSelected());
+                if (cbMapEdit.isSelected()) {
+                    model.setPaused(true);
+                    model.getCurrentPath().clear();
+                }
+                view.repaint();
+                requestFocusInWindow();
+            }
+        });
+
+        // Sound options checkbox
+        JCheckBox cbSound = new JCheckBox("Chiptune Synth Audio Effects", true);
+        cbSound.setBackground(new Color(25, 27, 34));
+        cbSound.setForeground(new Color(170, 180, 195));
+        cbSound.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        cbSound.setFocusable(false);
+        cbSound.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                controller.getSoundManager().setSoundEnabled(cbSound.isSelected());
+                requestFocusInWindow();
+            }
+        });
+
         sectionOptions.add(lblSpeed);
         sectionOptions.add(sliderSpeed);
-        sectionOptions.add(Box.createVerticalStrut(8));
+        sectionOptions.add(Box.createVerticalStrut(14));
         sectionOptions.add(lblEpsilon);
         sectionOptions.add(sliderEpsilon);
-        sectionOptions.add(Box.createVerticalStrut(10));
+        sectionOptions.add(Box.createVerticalStrut(14));
         sectionOptions.add(cbShowPath);
-        sectionOptions.add(Box.createVerticalStrut(10));
+        sectionOptions.add(Box.createVerticalStrut(12));
+        sectionOptions.add(cbRival);
+        sectionOptions.add(Box.createVerticalStrut(12));
+        sectionOptions.add(cbMapEdit);
+        sectionOptions.add(Box.createVerticalStrut(12));
+        sectionOptions.add(cbSound);
+        sectionOptions.add(Box.createVerticalStrut(15));
         sectionOptions.add(lblBorderMode);
-        sectionOptions.add(Box.createVerticalStrut(3));
+        sectionOptions.add(Box.createVerticalStrut(4));
         sectionOptions.add(comboBorder);
+        sectionOptions.add(Box.createVerticalStrut(15));
+        sectionOptions.add(lblTheme);
+        sectionOptions.add(Box.createVerticalStrut(4));
+        sectionOptions.add(comboTheme);
 
         panel.add(sectionOptions);
-        panel.add(Box.createVerticalStrut(10));
+        panel.add(Box.createVerticalStrut(12));
 
         // --- SECTION 3: STATISTICS HUD ---
-        JPanel sectionHUD = createSectionContainer("LIVE METRICS");
+        JPanel sectionHUD = createSectionContainer("LIVE METRICS", 160);
         sectionHUD.setLayout(new GridLayout(6, 2, 5, 5));
 
         lblScoreVal = createHUDValueLabel("0");
@@ -299,9 +398,12 @@ public class Project extends JFrame {
         // --- SECTION 4: ACTIONS BUTTONS ---
         JPanel btnPanel = new JPanel(new GridLayout(3, 2, 5, 5));
         btnPanel.setBackground(new Color(25, 27, 34));
-        btnPanel.setMaximumSize(new Dimension(290, 110));
+        btnPanel.setPreferredSize(new Dimension(280, 110));
+        btnPanel.setMinimumSize(new Dimension(280, 110));
+        btnPanel.setMaximumSize(new Dimension(280, 110));
+        btnPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JButton btnPause = new JButton("Pause");
+        btnPause = new JButton("Pause");
         JButton btnReset = new JButton("Reset");
         JButton btnBoard = new JButton("Scores");
         JButton btnHelp = new JButton("Help");
@@ -334,6 +436,9 @@ public class Project extends JFrame {
         btnBoard.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (model.isGameStarted() && !model.isGameOver() && !model.isPaused()) {
+                    controller.pauseGame();
+                }
                 LeaderboardDialog dialog = new LeaderboardDialog(Project.this, new DatabaseManager());
                 dialog.setVisible(true);
                 requestFocusInWindow();
@@ -343,6 +448,9 @@ public class Project extends JFrame {
         btnHelp.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (model.isGameStarted() && !model.isGameOver() && !model.isPaused()) {
+                    controller.pauseGame();
+                }
                 HelpDialog dialog = new HelpDialog(Project.this);
                 dialog.setVisible(true);
                 requestFocusInWindow();
@@ -359,6 +467,9 @@ public class Project extends JFrame {
         btnCredits.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (model.isGameStarted() && !model.isGameOver() && !model.isPaused()) {
+                    controller.pauseGame();
+                }
                 CreditsDialog dialog = new CreditsDialog(Project.this);
                 dialog.setVisible(true);
                 requestFocusInWindow();
@@ -372,26 +483,57 @@ public class Project extends JFrame {
         btnPanel.add(btnFull);
         btnPanel.add(btnCredits);
         panel.add(btnPanel);
+
+        panel.add(Box.createVerticalStrut(5));
+
+        JButton btnExit = new JButton("Exit");
+        styleButton(btnExit, new Color(255, 59, 48)); // red accent
+        btnExit.setPreferredSize(new Dimension(280, 33));
+        btnExit.setMinimumSize(new Dimension(280, 33));
+        btnExit.setMaximumSize(new Dimension(280, 33));
+        btnExit.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnExit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                exitApplication();
+            }
+        });
+        panel.add(btnExit);
+        panel.add(Box.createVerticalStrut(15));
         
         panel.add(Box.createVerticalGlue());
 
         return panel;
     }
 
+    private void exitApplication() {
+        if (controller != null && controller.getGameTimer() != null) {
+            controller.getGameTimer().stop();
+        }
+        dispose();
+        System.exit(0);
+    }
+
     // Styling Helpers
-    private JPanel createSectionContainer(String title) {
+    private JPanel createSectionContainer(String title, int height) {
         JPanel section = new JPanel();
         section.setLayout(new BoxLayout(section, BoxLayout.Y_AXIS));
         section.setBackground(new Color(25, 27, 34));
-        section.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(new Color(50, 55, 68), 1),
-            title,
-            0,
-            2,
-            new Font("Segoe UI", Font.BOLD, 11),
-            new Color(110, 115, 125)
+        section.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(50, 55, 68), 1),
+                title,
+                0,
+                2,
+                new Font("Segoe UI", Font.BOLD, 11),
+                new Color(110, 115, 125)
+            ),
+            BorderFactory.createEmptyBorder(6, 10, 6, 10)
         ));
-        section.setMaximumSize(new Dimension(280, 190));
+        section.setPreferredSize(new Dimension(280, height));
+        section.setMinimumSize(new Dimension(280, height));
+        section.setMaximumSize(new Dimension(280, height));
+        section.setAlignmentX(Component.CENTER_ALIGNMENT);
         return section;
     }
 
@@ -449,6 +591,9 @@ public class Project extends JFrame {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 btn.setBackground(accent);
                 btn.setForeground(new Color(15, 17, 22)); // High-contrast text
+                if (controller != null && controller.getSoundManager() != null) {
+                    controller.getSoundManager().playHoverSound();
+                }
             }
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
@@ -483,7 +628,7 @@ public class Project extends JFrame {
         JComponent content = (JComponent) getContentPane();
         int[] keys = {
             KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT,
-            KeyEvent.VK_SPACE, KeyEvent.VK_F11
+            KeyEvent.VK_SPACE, KeyEvent.VK_F11, KeyEvent.VK_P
         };
 
         for (int k : keys) {

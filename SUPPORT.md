@@ -1,6 +1,6 @@
 # Support Guidelines
 
-Thank you for playing and developing with Smart Snake Game! Here is how to get support.
+Thank you for playing and developing with Smart Snake! Here is how to get support.
 
 ## Issue Tracking
 If you encounter a bug or have a feature suggestion, please open a GitHub Issue using one of our templates:

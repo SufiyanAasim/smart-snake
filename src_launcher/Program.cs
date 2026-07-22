@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace SmartSnakeGameLauncher
+namespace SmartSnakeLauncher
 {
     class Program
     {
@@ -11,7 +11,7 @@ namespace SmartSnakeGameLauncher
             try
             {
                 string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-                string jarPath = Path.Combine(baseDir, "dist", "SmartSnakeGame.jar");
+                string jarPath = Path.Combine(baseDir, "dist", "SmartSnake.jar");
                 string libDir = Path.Combine(baseDir, "lib");
                 
                 string classpath = $"{jarPath};{Path.Combine(libDir, "sqlite-jdbc.jar")};{Path.Combine(libDir, "slf4j-api.jar")};{Path.Combine(libDir, "slf4j-simple.jar")}";

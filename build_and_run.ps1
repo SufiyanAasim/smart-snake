@@ -1,4 +1,4 @@
-# Build and Run script for Smart Snake Game
+# Build and Run script for Smart Snake
 # Target JDK: Android OpenJDK 21 or system default
 
 $JDK_PATH = "C:\Program Files\Android\openjdk\jdk-21.0.8\bin"
@@ -31,12 +31,12 @@ if (-not (Test-Path "dist")) {
     New-Item -ItemType Directory -Force -Path "dist" | Out-Null
 }
 
-& $JAR --create --file dist/SmartSnakeGame.jar --main-class project.Project -C out project
+& $JAR --create --file dist/SmartSnake.jar --main-class project.Project -C out project
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Packaging failed!"
     exit $LASTEXITCODE
 }
-Write-Host "JAR packaged successfully at dist/SmartSnakeGame.jar" -ForegroundColor Green
+Write-Host "JAR packaged successfully at dist/SmartSnake.jar" -ForegroundColor Green
 
-Write-Host "=== Running Smart Snake Game ===" -ForegroundColor Cyan
-& $JAVA -cp "dist/SmartSnakeGame.jar;lib/sqlite-jdbc.jar;lib/slf4j-api.jar;lib/slf4j-simple.jar" project.Project
+Write-Host "=== Running Smart Snake ===" -ForegroundColor Cyan
+& $JAVA -cp "dist/SmartSnake.jar;lib/sqlite-jdbc.jar;lib/slf4j-api.jar;lib/slf4j-simple.jar" project.Project

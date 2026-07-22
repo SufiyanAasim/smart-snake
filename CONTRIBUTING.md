@@ -1,4 +1,4 @@
-# Contributing to Smart Snake Game
+# Contributing to Smart Snake
 
 Thank you for choosing to contribute! Here are the guidelines to get started.
 

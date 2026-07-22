@@ -1,17 +1,45 @@
-# Compiler and IDE outputs
-build/
-dist/
-out/
-nbproject/private/
-.idea/workspace.xml
-.idea/shelf/
-.idea/history/
+# Compiled Java Outputs
 *.class
+/out/
+/build/
+/dist/
 
-# Persistence files
+# NetBeans Private Data
+/nbproject/private/
+
+# IntelliJ IDEA Metadata
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/shelf/
+.idea/dictionaries/
+.idea/history/
+
+# VS Code Metadata
+.vscode/
+
+# OS-generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# Temporary and Log files
+*.log
+*.tmp
+*.temp
+*.bak
+
+# SQLite Databases & ML weights
 q_table.txt
-scores.db
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
 
-# C# Launcher artifacts
+# .NET / C# Launcher Compilation Artifacts
 src_launcher/bin/
 src_launcher/obj/
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
